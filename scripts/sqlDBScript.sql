@@ -15,10 +15,11 @@ CREATE TABLE users (
     name VARCHAR(50),
     lastName VARCHAR(50),
     biography VARCHAR(250),
+    hashPassword VARCHAR(250),
     verified BOOLEAN DEFAULT FALSE,
     profilePictureSrc VARCHAR(250),
     bannerPictureSrc VARCHAR(250),
-    registerDate DATE
+    registerDate VARCHAR(12)
 );
 
 CREATE TABLE followsUsers (
