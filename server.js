@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./src/database/mySqlConnection');
-//TODO: add moongose, morgan?, swagger
+//TODO: add moongose, morgan?, swagger, jest
 
 const app = express();
 
@@ -43,7 +43,7 @@ db.connect(dbConfig, (err) => {
 
 // Routes
 const routes = require('./src/routes/routes');
-app.use('/api', routes);
+app.use('/', routes);
 
 // Port & host
 const port = process.env.SERVER_PORT ?? 3001;
