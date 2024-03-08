@@ -27,6 +27,7 @@ const swaggerOptions = {
     // APIs to document
     apis: [
         srcRoutes + 'auth.js',
+        srcRoutes + 'projects.js'
     ]
 };
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./src/database/mySqlConnection');
-//TODO: add moongose, morgan?, swagger, jest
+//TODO: add moongose, morgan?, jest
 
 const app = express();
 
