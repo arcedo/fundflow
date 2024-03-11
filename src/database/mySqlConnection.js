@@ -13,7 +13,6 @@ exports.connect = function (db, done) {
             user: db.user,
             password: db.password,
             database: db.database,
-            connectionLimit: db.connectionLimit
         });
     } else {
         state.pool = mysql.createPool({
@@ -21,7 +20,6 @@ exports.connect = function (db, done) {
             user: db.user,
             password: db.password,
             database: db.database,
-            connectionLimit: db.connectionLimit
         });
     }
     state.promisePool = state.pool.promise();

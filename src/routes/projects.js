@@ -1,258 +1,135 @@
-const express = require('express');
-const router = express.Router();
+const { Router } = require('express');
+const router = Router();
 const db = require('../database/mySqlConnection');
-const jwt = require('jsonwebtoken');
-/**
- * @swagger
- * tags:
- *   - name: Projects
- *     description: Operations related to projects
- * definitions:
- *   schemas:
- *     NewProject:
- *       description: New Project Schema
- *       type: object
- *       properties:
- *         idCategory:
- *           type: number
- *         idUser:
- *           type: number
- *         title:
- *           type: string
- *         description:
- *           type: string
- *         priceGoal:
- *           type: number
- *         collGoal:
- *           type: number
- *         views:
- *           type: number
- *         deadlineDate:
- *           type: string
- *       required: [idCategory, idUser, title, description, priceGoal, collGoal, views, deadlineDate]
- */
+const StatsProjects = require('../models/StatsProjects');
 
-/**
- * @swagger
- * /projects:
- *   get:
- *     tags:
- *       - Projects
- *     summary: Get all projects
- *     description: Get all projects
- *     parameters:
- *       - in: query
- *         name: startIndex
- *         description: Start index
- *         required: true
- *         type: number
- *       - in: query
- *         name: limit
- *         description: Limit of projects
- *         required: true
- *         type: number
- *     responses:
- *       200:
- *         description: Successful request
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/schemas/NewProject'
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: No projects found
- *       500:
- *         description: Internal Server Error
- */
-//Request Example: /projects?startIndex=0&limit=10
-router.get('/', (req, res) => {
+function validateQueryParams(req, res, next) {
     const startIndex = parseInt(req.query.startIndex, 10);
     const limit = parseInt(req.query.limit, 10);
-    db.query('SELECT * FROM projects ORDER BY creationDate ASC LIMIT ?, ?', [startIndex, limit], (err, result) => {
-        if (err) {
-            res.status(500).json({ message: err });
-        } else if (result.length > 0) {
-            res.status(200).json(result);
+    console.log(startIndex, limit);
+    if (startIndex > 0 && limit > 0) {
+        return res.status(400).send({ error: 'startIndex and limit query parameters are required' });
+    } else {
+        // Store the validated values in the request object
+        req.startIndex = startIndex;
+        req.limit = limit;
+        next();
+    }
+}
+
+async function executeQuery(sql, params) {
+    try {
+        const [rows, fields] = await db.getPromise().query(sql, params);
+        return rows;
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        throw error;
+    }
+}
+
+// Example request: /projects?startIndex=0&limit=10
+router.get('/', validateQueryParams, async (req, res) => {
+    // Access the validated values from the request object
+    const startIndex = req.startIndex;
+    const limit = req.limit;
+    try {
+        const rows = await executeQuery('SELECT * FROM projects LIMIT ?, ?', [startIndex, limit]);
+        if (rows.length > 0) {
+            res.status(200).json(rows);
         } else {
-            res.status(404).json({ message: 'No projects found' });
+            res.status(404).send({ message: 'No projects found' });
         }
-    });
-});
-// Request Example: /projects/byInterest?startIndex=0&limit=10
-router.get('/byInterest', (req, res) => {
-    const startIndex = parseInt(req.query.startIndex, 10);
-    const limit = parseInt(req.query.limit, 10);
-    const userId = req.user;
-    db.query('SELECT cat.name FROM stat', [userId, startIndex, limit], (err, result) => {
-
-    });
-
-});
-
-/**
- * @swagger
- * /projects/{id}:
- *   get:
- *     tags:
- *       - Projects
- *     summary: Get a project by id
- *     description: Get a project by id
- *     parameters:
- *       - in: path
- *         name: id
- *         description: Project id
- *         required: true
- *         type: number
- *     responses:
- *       200:
- *         description: Successful request
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/schemas/NewProject'
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: No project found
- *       500:
- *         description: Internal Server Error
- */
-router.get('/:id', (req, res) => {
-    const id = req.params.id;
-    db.query('SELECT * FROM projects WHERE id = ?', [id], (err, result) => {
-        if (err) {
-            res.status(500).json({ message: err });
-        } else if (result.length > 0) {
-            res.status(200).json(result);
-        } else {
-            res.status(404).json({ message: 'No project found' });
-        }
-    });
+    } catch (error) {
+        console.error("Error executing database query:", error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
 });
 
-/**
- * @swagger
- * /projects:
- *   post:
- *     tags:
- *       - Projects
- *     summary: Create a new project
- *     description: Create a new project
- *     parameters:
- *       - in: body
- *         name: project
- *         description: Project to add
- *         required: true
- *         schema:
- *           $ref: '#/definitions/schemas/NewProject'
- *     responses:
- *       201:
- *         description: Project created
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/schemas/NewProject'
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal Server Error
- */
-router.post('/', (req, res) => {
-    const project = req.body;
-    db.query('INSERT INTO projects SET ?', project, (err, result) => {
-        if (err) {
-            res.status(500).json({ message: err });
+// Example request: /projects/byInterests?startIndex=0&limit=10
+router.get('/byInterests', validateQueryParams, async (req, res) => {
+    try {
+        const startIndex = req.startIndex;
+        const limit = req.limit;
+        const userId = req.user;
+        if (userId) {
+            const likedProjects = await StatsProjects.find({ idUser: userId, likes: { $eq: true } });
+            const projectsIds = likedProjects.map((project) => project.idProject);
+            const rows = await executeQuery('SELECT p.* FROM projects p WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN(?)) LIMIT ?, ?;', [projectsIds, startIndex, limit]);
+            if (rows.length > 0) {
+                res.status(200).json(rows);
+            } else {
+                res.status(404).send({ error: 'No projects found' });
+            }
         } else {
-            res.status(201).json({ message: 'Project created' });
+            res.status(400).send({ error: 'User ID is missing' });
         }
-    });
+    } catch (error) {
+        console.error('Error in /byInterests route:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
 });
 
-
-/**
- * @swagger
- * /projects/{id}:
- *   put:
- *     tags:
- *       - Projects
- *     summary: Update a project
- *     description: Update a project
- *     parameters:
- *       - in: path
- *         name: id
- *         description: Project id
- *         required: true
- *         type: number
- *       - in: body
- *         name: project
- *         description: Project to update
- *         required: true
- *         schema:
- *           $ref: '#/definitions/schemas/NewProject'
- *     responses:
- *       200:
- *         description: Project updated
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/schemas/NewProject'
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: No project found
- *       500:
- *         description: Internal Server Error
- */
-router.put('/:id', (req, res) => {
-    const id = req.params.id;
-    const project = req.body;
-    db.query('UPDATE projects SET ? WHERE id = ?', [project, id], (err, result) => {
-        if (err) {
-            res.status(500).json({ message: err });
-        } else if (result.affectedRows > 0) {
-            res.status(200).json({ message: 'Project updated' });
+// Example request: /projects/byCategory/1?startIndex=0&limit=10
+router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
+    try {
+        const startIndex = req.startIndex;
+        const limit = req.limit;
+        const rows = await executeQuery('SELECT * FROM projects WHERE idCategory = ? LIMIT ?, ?', [req.params.idCategory, startIndex, limit]);
+        if (rows.length > 0) {
+            res.status(200).json(rows);
         } else {
-            res.status(404).json({ message: 'No project found' });
+            res.status(404).send({ message: 'No projects found' });
         }
-    });
+    } catch (error) {
+        console.error('Error in /byCategory route:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
 });
 
-/**
- * @swagger
- * /projects/{id}:
- *   delete:
- *     tags:
- *       - Projects
- *     summary: Delete a project
- *     description: Delete a project
- *     parameters:
- *       - in: path
- *         name: id
- *         description: Project id
- *         required: true
- *         type: number
- *     responses:
- *       200:
- *         description: Project deleted
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: No project found
- *       500:
- *         description: Internal Server Error
- */
-router.delete('/:id', (req, res) => {
-    const id = req.params.id;
-    db.query('DELETE FROM projects WHERE id = ?', [id], (err, result) => {
-        if (err) {
-            res.status(500).json({ message: err });
-        } else if (result.affectedRows > 0) {
-            res.status(200).json({ message: 'Project deleted' });
+router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
+    try {
+        const startIndex = req.startIndex;
+        const limit = req.limit;
+        const rows = await executeQuery('SELECT * FROM projects WHERE idUser = ? LIMIT ?, ?', [req.params.idUser, startIndex, limit]);
+        if (rows.length > 0) {
+            res.status(200).json(rows);
         } else {
-            res.status(404).json({ message: 'No project found' });
+            res.status(404).send({ message: 'No projects found' });
         }
-    });
+    } catch (error) {
+        console.error('Error in /byUser route:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/random', validateQueryParams, async (req, res) => {
+    try {
+        const startIndex = req.startIndex;
+        const limit = req.limit;
+        const rows = await executeQuery('SELECT * FROM projects ORDER BY RAND() LIMIT ?, ?', [startIndex, limit]);
+        if (rows.length > 0) {
+            res.status(200).json(rows);
+        } else {
+            res.status(404).send({ message: 'No projects found' });
+        }
+    } catch (error) {
+        console.error('Error in /random route:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    try {
+        const rows = await executeQuery('SELECT * FROM projects WHERE id = ?', [req.params.id]);
+        if (rows.length > 0) {
+            res.status(200).json(rows[0]);
+        } else {
+            res.status(404).send({ message: 'No project found' });
+        }
+    } catch (error) {
+        console.error('Error in /:id route:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
 });
 
 module.exports = router;

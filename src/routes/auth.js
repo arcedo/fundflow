@@ -1,5 +1,5 @@
-const express = require('express');
-const router = express.Router();
+const { Router } = require('express');
+const router = Router();
 const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
 const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
@@ -35,6 +35,10 @@ const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
  *           type: string
  *       required: ['username', 'password']
  */
+
+router.get('/', (req, res) => {
+    res.send('Auth route');
+});
 
 /**
  * @swagger
@@ -104,7 +108,7 @@ router.post('/register', async (req, res, next) => {
             else {
                 const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
                 const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                    'INSERT INTO users (username, email, hashPassword, userRole, registerDate) VALUES (?, ?, ?, ?, ?);',
+                    'INSERT INTO users (username, email, hashPassword, role, registerDate) VALUES (?, ?, ?, ?, ?);',
                     [username, email, hashedPassword, 'user', new Date().toLocaleDateString('en-GB', dateOptions)]
                 );
                 if (rowsInsert.affectedRows > 0) {

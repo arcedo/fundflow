@@ -9,7 +9,7 @@ USE fundflow;
 
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    userRole VARCHAR(30) NOT NULL,
+    role VARCHAR(30) NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(50),
@@ -41,11 +41,13 @@ CREATE TABLE projects (
     idUser BIGINT UNSIGNED NOT NULL,
     title VARCHAR(50) NOT NULL,
     description VARCHAR(200) NOT NULL,
+    about VARCHAR(250),
     priceGoal BIGINT UNSIGNED NOT NULL,
     collGoal BIGINT UNSIGNED NOT NULL,
     creationDate DATE,
     deadlineDate DATE,
     views BIGINT UNSIGNED NOT NULL,
+    coverImageSrc VARCHAR(250),
     FOREIGN KEY (idCategory) REFERENCES categories(id),
     FOREIGN KEY (idUser) REFERENCES users(id)
 );
@@ -66,22 +68,22 @@ CREATE TABLE collaborators (
     FOREIGN KEY (idUser) REFERENCES users(id)
 );
 
-CREATE TABLE blockedUsers (
-    id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
-    idUser BIGINT UNSIGNED NOT NULL,
-    blockDateStart DATE,
-    blockDateFinish DATE,
-    FOREIGN KEY (idUser) REFERENCES users(id)
-);
+-- CREATE TABLE blockedUsers (
+--     id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+--     idUser BIGINT UNSIGNED NOT NULL,
+--     blockDateStart DATE,
+--     blockDateFinish DATE,
+--     FOREIGN KEY (idUser) REFERENCES users(id)
+-- );
 
-CREATE TABLE projectBlogs (
-    id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
-    idProject BIGINT UNSIGNED NOT NULL,
-    title VARCHAR(50),
-    subtitle VARCHAR(50),
-    body VARCHAR(250),
-    FOREIGN KEY (idProject) REFERENCES projects(id)
-);
+-- CREATE TABLE projectBlogs (
+--     id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+--     idProject BIGINT UNSIGNED NOT NULL,
+--     title VARCHAR(50),
+--     subtitle VARCHAR(50),
+--     body VARCHAR(250),
+--     FOREIGN KEY (idProject) REFERENCES projects(id)
+-- );
 
 CREATE TABLE tiers (
 	id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
@@ -91,5 +93,9 @@ CREATE TABLE tiers (
 	srcImage VARCHAR(250),
 	FOREIGN KEY (idProject) REFERENCES projects(id)
 );
+
+-- Default categories
+INSERT INTO categories (name) VALUES ('Art'), ('Music'), ('Books'), ('Games'), ('Innove'), ('Dev');
+
 
 

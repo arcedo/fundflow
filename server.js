@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./src/database/mySqlConnection');
-//TODO: add moongose, morgan?, jest
+const mongoose = require('mongoose');
+
+// TODO: add morgan?, jest
 
 const app = express();
 
 // Configuration
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -15,6 +16,11 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something went wrong!');
 });
+
+// Port & host
+const port = process.env.SERVER_PORT ?? 3001;
+const host = process.env.SERVER_HOST ?? "http://localhost";
+app.listen(port, () => console.log(`URL: ${host}:${port}`));
 
 // Database configuration/connection
 const dbConfig = {
@@ -27,7 +33,7 @@ const dbConfig = {
 
 db.connect(dbConfig, (err) => {
     if (err) {
-        console.log('Unable to connect to the database:', err);
+        console.log('Unable to connect to the database (MySQL):', err);
         process.exit(1);
     } else {
         db.get().query('SELECT NOW() as date;', function (err, rows) {
@@ -35,7 +41,7 @@ db.connect(dbConfig, (err) => {
                 console.error('Unable to execute query to MySQL: ' + err);
                 process.exit(1);
             } else {
-                console.log(`DATA_BASE: Connected to MySQL ${dbConfig.database} successfully\nDATE: ${rows[0]['date']}`);
+                console.log(`MySQL: Connected to MySQL ${dbConfig.database} successfully\nDATE: ${rows[0]['date']}`);
             }
         });
     }
@@ -45,9 +51,39 @@ db.connect(dbConfig, (err) => {
 const routes = require('./src/routes/routes');
 app.use('/', routes);
 
-// Port & host
-const port = process.env.SERVER_PORT ?? 3001;
-const host = process.env.SERVER_HOST ?? "http://localhost";
-app.listen(port, () => console.log(`URL: ${host}:${port}`));
+// Import models
+import ReviewsProjects from './src/models/reviewsProjects';
+import SrcImages from './src/models/srcImages';
+import StatsProjects from './src/models/statsProjects';
 
-module.exports = app;
+// Connect to MongoDB
+try {
+    mongoose.connect(process.env.MONGO_URL + '/fundflow');
+    console.log('MongoDB: Connected to MongoDB fundflow successfully');
+} catch (error) {
+    console.error('Error connecting to MongoDB: ', error.stack);
+}
+
+// Create a new StatsProjects instance with valid idUser
+// const statsProjects = new StatsProjects({
+//     idUser: 1,
+//     idProject: 1,
+//     likes: 0,
+//     shares: 0
+// });
+
+// statsProjects.save()
+//     .then((result) => {
+//         console.log(result);
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
+
+// StatsProjects.find()
+//     .then((data) => {
+//         console.log('StatsProjects data for idUser 1:', data);
+//     })
+//     .catch((error) => {
+//         console.error('Error retrieving StatsProjects data:', error);
+//     });
