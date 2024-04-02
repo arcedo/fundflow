@@ -2,21 +2,21 @@ const mongoose = require('mongoose');
 
 const { Schema, model } = mongoose;
 
-const reviewsProjectsSchema = new Schema({
-    idUser: {
-        type: Number,
-        required: true
-    },
+const commentsProjects = new Schema({
     idProject: {
         type: Number,
         required: true
     },
-    body: {
-        type: String,
+    idUser: {
+        type: Number,
         required: true
     },
-    rating: {
-        type: Boolean,
+    replyTo: {
+        type: Number,
+        required: false
+    },
+    content: {
+        type: String,
         required: true
     },
     creationDate: {
@@ -26,5 +26,5 @@ const reviewsProjectsSchema = new Schema({
     },
 });
 
-const ReviewsProjects = model('ReviewsProjects', reviewsProjectsSchema);
-export default ReviewsProjects;
+const CommentsProjects = model('CommentsProjects', commentsProjects);
+export default CommentsProjects;

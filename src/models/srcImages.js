@@ -3,8 +3,18 @@ const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
 const srcImagesSchema = new Schema({
-    srcImage: { type: String, required: true },
-    idProject: { type: Number, required: true },
+    idProject: {
+        type: Number,
+        required: true
+    },
+    srcImage: {
+        type: String,
+        required: true
+    },
+    lastUpdated: {
+        type: Date,
+        default: () => Date.now()
+    },
 });
 
 const SrcImages = model('SrcImages', srcImagesSchema);

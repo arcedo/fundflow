@@ -183,4 +183,6 @@ router.post('/login', async (req, res, next) => {
     }
 });
 
+//TODO: create the mailing routes for user actions as password reset, email verification, etc. USING RESEND
+
 module.exports = router;

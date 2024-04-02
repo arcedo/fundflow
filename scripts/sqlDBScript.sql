@@ -19,7 +19,10 @@ CREATE TABLE users (
     verified BOOLEAN DEFAULT FALSE,
     profilePictureSrc VARCHAR(250),
     bannerPictureSrc VARCHAR(250),
-    registerDate VARCHAR(12)
+    registerDate VARCHAR(12),
+    action VARCHAR(50),
+    code VARCHAR(50),
+    codeDate VARCHAR(12)
 );
 
 CREATE TABLE followsUsers (
@@ -42,11 +45,11 @@ CREATE TABLE projects (
     title VARCHAR(50) NOT NULL,
     description VARCHAR(200) NOT NULL,
     about VARCHAR(250),
-    priceGoal BIGINT UNSIGNED NOT NULL,
-    collGoal BIGINT UNSIGNED NOT NULL,
-    creationDate DATE,
-    deadlineDate DATE,
-    views BIGINT UNSIGNED NOT NULL,
+    priceGoal BIGINT UNSIGNED,
+    currency VARCHAR(10),
+    collGoal BIGINT UNSIGNED,
+    creationDate DATE NOT NULL,
+    deadlineDate DATE NOT NULL,
     coverImageSrc VARCHAR(250),
     FOREIGN KEY (idCategory) REFERENCES categories(id),
     FOREIGN KEY (idUser) REFERENCES users(id)
