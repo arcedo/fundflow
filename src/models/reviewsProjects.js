@@ -27,4 +27,5 @@ const reviewsProjectsSchema = new Schema({
 });
 
 const ReviewsProjects = model('ReviewsProjects', reviewsProjectsSchema);
-export default ReviewsProjects;
+
+module.exports = ReviewsProjects;

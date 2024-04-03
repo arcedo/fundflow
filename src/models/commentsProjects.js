@@ -27,4 +27,5 @@ const commentsProjects = new Schema({
 });
 
 const CommentsProjects = model('CommentsProjects', commentsProjects);
-export default CommentsProjects;
+
+module.exports = CommentsProjects;

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { Schema, model } = mongoose;
 
-const blogsProjects = new Schema({
+const blogsProjectsSchema = new Schema({
     idProject: {
         type: Number,
         required: true
@@ -22,5 +22,6 @@ const blogsProjects = new Schema({
     },
 });
 
-const BlogsProjects = model('BlogsProjects', blogsProjects);
-export default BlogsProjects;
+const BlogsProjects = model('BlogsProjects', blogsProjectsSchema);
+
+module.exports = BlogsProjects;

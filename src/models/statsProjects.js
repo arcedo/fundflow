@@ -1,7 +1,9 @@
 // ./src/models/statsProjects.js
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-const statsProjectSchema = new mongoose.Schema({
+const { Schema, model } = mongoose;
+
+const statsProjectSchema = new Schema({
     idUser: {
         type: Number,
         required: true
@@ -32,6 +34,6 @@ const statsProjectSchema = new mongoose.Schema({
     }
 });
 
-const StatsProjects = mongoose.model('StatsProject', statsProjectSchema);
+const StatsProjects = model('StatsProject', statsProjectSchema);
 
 export default StatsProjects;

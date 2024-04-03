@@ -26,12 +26,11 @@ const swaggerOptions = {
     },
     // APIs to document
     apis: [
-        srcRoutes + 'auth.js',
-        srcRoutes + 'projects.js'
+        srcRoutes + '*.js',
     ]
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 module.exports = app;

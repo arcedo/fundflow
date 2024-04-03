@@ -36,10 +36,6 @@ const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
  *       required: ['username', 'password']
  */
 
-router.get('/', (req, res) => {
-    res.send('Auth route');
-});
-
 /**
  * @swagger
  * /auth/register:

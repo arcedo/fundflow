@@ -18,4 +18,5 @@ const srcImagesSchema = new Schema({
 });
 
 const SrcImages = model('SrcImages', srcImagesSchema);
-export default SrcImages;
+
+module.exports = SrcImages;
