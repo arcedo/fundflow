@@ -89,7 +89,7 @@ function validateQueryParams(req, res, next) {
     const startIndex = parseInt(req.query.startIndex, 10);
     const limit = parseInt(req.query.limit, 10);
     if (startIndex > 0 && limit > 0) {
-        return res.status(400).send({ error: 'startIndex and limit query parameters are required' });
+        return res.status(400).send({ message: 'startIndex and limit query parameters are required' });
     } else {
         // Store the validated values in the request object
         req.startIndex = startIndex;
@@ -162,7 +162,7 @@ router.get('/', validateQueryParams, async (req, res) => {
         }
     } catch (error) {
         console.error("Error executing database query:", error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -213,14 +213,14 @@ router.get('/byInterests', validateQueryParams, async (req, res) => {
             if (rows.length > 0) {
                 res.status(200).json(rows);
             } else {
-                res.status(404).send({ error: 'No projects found' });
+                res.status(404).send({ message: 'No projects found' });
             }
         } else {
-            res.status(400).send({ error: 'User ID is missing' });
+            res.status(400).send({ message: 'User ID is missing' });
         }
     } catch (error) {
         console.error('Error in /byInterests route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -276,7 +276,7 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
         }
     } catch (error) {
         console.error('Error in /byCategory route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -331,7 +331,7 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
         }
     } catch (error) {
         console.error('Error in /byUser route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -380,7 +380,7 @@ router.get('/random', validateQueryParams, async (req, res) => {
         }
     } catch (error) {
         console.error('Error in /random route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -421,7 +421,7 @@ router.get('/:id', async (req, res) => {
         }
     } catch (error) {
         console.error('Error in /:id route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -454,22 +454,21 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-
 router.post('/', async (req, res) => {
     try {
         const { idCategory, idUser, title, description, goal, typeGoal, currency, deadlineDate } = req.body;
         // Validate required fields and their types/format if necessary
         if (!idCategory || !idUser || !title || !description || !goal || !typeGoal || !currency || !deadlineDate) {
-            return res.status(400).send({ error: 'All fields are required!' });
+            return res.status(400).send({ message: 'All fields are required!' });
         }
         // Check if goal is a valid number
         if (isNaN(Number(goal))) {
-            return res.status(400).send({ error: 'Goal must be a valid number!' });
+            return res.status(400).send({ message: 'Goal must be a valid number!' });
         }
         // Check if deadlineDate is a valid date format
         const parsedDeadlineDate = new Date(deadlineDate);
         if (isNaN(parsedDeadlineDate.getTime())) {
-            return res.status(400).send({ error: 'Deadline date must be a valid date format!' });
+            return res.status(400).send({ message: 'Deadline date must be a valid date format!' });
         }
         // Execute the database query
         const rows = await executeQuery(
@@ -480,11 +479,11 @@ router.post('/', async (req, res) => {
         if (rows.affectedRows > 0) {
             res.status(201).send({ message: 'Project created successfully', id: rows.insertId });
         } else {
-            res.status(400).send({ error: 'Unable to create project' });
+            res.status(400).send({ message: 'Unable to create project' });
         }
     } catch (error) {
         console.error('Error in POST / route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -531,12 +530,12 @@ router.put('/:id', async (req, res) => {
         const { idCategory, title, description, deadlineDate } = req.body;
         // Validate required fields and their types/format if necessary
         if (!idCategory || !title || !description || !deadlineDate) {
-            return res.status(400).send({ error: 'All fields are required!' });
+            return res.status(400).send({ message: 'All fields are required!' });
         }
         // Check if deadlineDate is a valid date format
         const parsedDeadlineDate = new Date(deadlineDate);
         if (isNaN(parsedDeadlineDate.getTime())) {
-            return res.status(400).send({ error: 'Deadline date must be a valid date format!' });
+            return res.status(400).send({ message: 'Deadline date must be a valid date format!' });
         }
         // Execute the database query
         const rows = await executeQuery(
@@ -547,11 +546,11 @@ router.put('/:id', async (req, res) => {
         if (rows.affectedRows > 0) {
             res.status(200).send({ message: 'Project updated successfully' });
         } else {
-            res.status(400).send({ error: 'Unable to update project' });
+            res.status(400).send({ message: 'Unable to update project' });
         }
     } catch (error) {
         console.error('Error in PUT /:id route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -596,7 +595,7 @@ router.put('/:id/cover', async (req, res) => {
         const { cover } = req.body;
         // Validate required fields and their types/format if necessary
         if (!cover) {
-            return res.status(400).send({ error: 'Cover is required!' });
+            return res.status(400).send({ message: 'Cover is required!' });
         }
         // Execute the database query
         const rows = await executeQuery('UPDATE projects SET coverImageSrc = ? WHERE id = ?', [cover, req.params.id]);
@@ -604,11 +603,11 @@ router.put('/:id/cover', async (req, res) => {
         if (rows.affectedRows > 0) {
             res.status(200).send({ message: 'Project cover updated successfully' });
         } else {
-            res.status(400).send({ error: 'Unable to update project cover' });
+            res.status(400).send({ message: 'Unable to update project cover' });
         }
     } catch (error) {
         console.error('Error in PUT /:id/cover route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -653,7 +652,7 @@ router.put('/:id/about', async (req, res) => {
         const { about } = req.body;
         // Validate required fields and their types/format if necessary
         if (!about) {
-            return res.status(400).send({ error: 'About is required!' });
+            return res.status(400).send({ message: 'About is required!' });
         }
         // Execute the database query
         const rows = await executeQuery('UPDATE projects SET about = ? WHERE id = ?', [about, req.params.id]);
@@ -661,11 +660,11 @@ router.put('/:id/about', async (req, res) => {
         if (rows.affectedRows > 0) {
             res.status(200).send({ message: 'Project about updated successfully' });
         } else {
-            res.status(400).send({ error: 'Unable to update project about' });
+            res.status(400).send({ message: 'Unable to update project about' });
         }
     } catch (error) {
         console.error('Error in PUT /:id/about route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -708,14 +707,14 @@ router.delete('/:id', async (req, res) => {
             if (rows.affectedRows > 0) {
                 res.status(200).send({ message: 'Project deleted successfully' });
             } else {
-                res.status(404).send({ error: 'No project found' });
+                res.status(404).send({ message: 'No project found' });
             }
         } else {
-            res.status(400).send({ error: 'Unable to delete project' });
+            res.status(400).send({ message: 'Unable to delete project' });
         }
     } catch (error) {
         console.error('Error in DELETE /:id route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 

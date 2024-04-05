@@ -257,11 +257,11 @@ router.delete('/:id/blog/:idBlog', async (req, res) => {
         if (result.deletedCount > 0) {
             res.status(200).send({ message: 'Blog deleted successfully' });
         } else {
-            res.status(404).send({ error: 'No blog found' });
+            res.status(404).send({ message: 'No blog found' });
         }
     } catch (error) {
         console.error('Error in DELETE /:id/blog/:idBlog route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 

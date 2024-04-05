@@ -22,9 +22,13 @@ router.use((req, res, next) => {
 const apiDocs = require('./apiDocs');
 const auth = require('./auth');
 const projects = require('./projects');
+const categories = require('./categories');
+const users = require('./users');
 
 router.use('/', apiDocs);
 router.use('/auth', auth);
 router.use('/projects', projects);
+router.use('/categories', categories);
+router.use('/users', users);
 
 module.exports = router;

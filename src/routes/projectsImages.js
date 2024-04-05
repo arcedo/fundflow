@@ -76,11 +76,11 @@ router.post('/:id/image', async (req, res) => {
             })
             .catch((error) => {
                 console.error('Error saving image source in MongoDB:', error);
-                res.status(400).send({ error: 'Unable to create image' });
+                res.status(400).send({ message: 'Unable to create image' });
             });
     } catch (error) {
         console.error('Error in POST /:id/image route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
@@ -126,11 +126,11 @@ router.delete('/:id/image/:idImage', async (req, res) => {
         if (result.deletedCount > 0) {
             res.status(200).send({ message: 'Image deleted successfully' });
         } else {
-            res.status(404).send({ error: 'No image found' });
+            res.status(404).send({ message: 'No image found' });
         }
     } catch (error) {
         console.error('Error in DELETE /:id/image/:id route:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 
