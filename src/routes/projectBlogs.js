@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const router = Router();
+const db = require('../database/mySqlConnection');
 
-//TODO: test if the user is logged in for all the routes that do an administrative action
+//TODO: the admin should be able to delete a blog
 
 // Schema
 const ProjectsBlogs = require('../models/blogsProjects');
@@ -125,7 +126,14 @@ router.get('/:id/blog', async (req, res) => {
  *         description: Internal server error.
  */
 router.post('/:id/blog', async (req, res) => {
+    if (!req.userId) {
+        return res.status(401).send({ message: 'Unauthorized' });
+    }
     try {
+        const userProject = await db.query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        if (userProject.length === 0) {
+            return res.status(401).send({ message: 'Unauthorized' });
+        }
         const { title, content } = req.body;
         // Validate required fields and their types/format if necessary
         if (!title || !content) {
@@ -196,7 +204,14 @@ router.post('/:id/blog', async (req, res) => {
  *         description: Internal server error.
  */
 router.put('/:id/blog/:idBlog', async (req, res) => {
+    if (!req.userId) {
+        return res.status(401).send({ message: 'Unauthorized' });
+    }
     try {
+        const userProject = await db.query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        if (userProject.length === 0) {
+            return res.status(401).send({ message: 'Unauthorized' });
+        }
         const { title, content } = req.body;
         // Validate required fields and their types/format if necessary
         if (!title || !content) {
@@ -252,7 +267,17 @@ router.put('/:id/blog/:idBlog', async (req, res) => {
  *         description: Internal server error.
  */
 router.delete('/:id/blog/:idBlog', async (req, res) => {
+    if (!req.userId) {
+        return res.status(401).send({ message: 'Unauthorized' });
+    }
     try {
+        const userProject = await db.query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        if (userProject.length === 0) {
+            const isAdmin = await db.query('SELECT role FROM users WHERE id = ?', [req.userId]);
+            if (isAdmin.length === 0 || isAdmin[0].role !== 1) {
+                return res.status(401).send({ message: 'Unauthorized' });
+            }
+        }
         const result = await ProjectsBlogs.deleteOne({ idProject: req.params.id, _id: req.params.idBlog });
         if (result.deletedCount > 0) {
             res.status(200).send({ message: 'Blog deleted successfully' });

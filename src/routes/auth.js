@@ -3,6 +3,10 @@ const router = Router();
 const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
 const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+const { Resend } = require('resend');
+const verifyUserLogged = require('../controllers/verifyUserLogged');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * @swagger
@@ -104,19 +108,19 @@ router.post('/register', async (req, res, next) => {
             else {
                 const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
                 const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                    'INSERT INTO users (username, email, hashPassword, role, registerDate) VALUES (?, ?, ?, ?, ?);',
-                    [username, email, hashedPassword, 'user', new Date().toLocaleDateString('en-GB', dateOptions)]
+                    'INSERT INTO users (username, email, hashPassword, registerDate) VALUES (?, ?, ?, ?);',
+                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions)]
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Return token
-                    res.status(201).send(jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET));
+                    res.status(201).send({ id: rowsInsert.insertId, token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET) });
                 } else {
                     res.status(500).send({ message: 'Something went wrong while adding your account!' });
                 }
             }
         }
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send({ message: 'Something went wrong during registration!', errorCode: error });
     }
 });
@@ -156,8 +160,8 @@ router.post('/login', async (req, res, next) => {
             const isValidEmail = username.includes('@') && username.includes('.') && username.indexOf('@') < username.lastIndexOf('.');
 
             const query = isValidEmail
-                ? 'SELECT id, username, hashPassword, userRole FROM users WHERE email = ?'
-                : 'SELECT id, username, hashPassword, userRole FROM users WHERE username = ?';
+                ? 'SELECT id, username, hashPassword, role FROM users WHERE email = ?'
+                : 'SELECT id, username, hashPassword, role FROM users WHERE username = ?';
 
             const [rows, fields] = await db.getPromise().query(query, [username]);
 
@@ -165,7 +169,7 @@ router.post('/login', async (req, res, next) => {
                 const hashedPassword = rows[0].hashPassword;
                 const passwordMatch = await Bun.password.verify(password, hashedPassword);
                 if (passwordMatch) {
-                    res.status(200).send(jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET));
+                    res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET) });
                 } else {
                     res.status(401).send({ message: 'Authentication failed', errorValues: { username, password } });
                 }
@@ -174,11 +178,25 @@ router.post('/login', async (req, res, next) => {
             }
         }
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send({ message: 'Something went wrong during login!', errorCode: error });
     }
 });
 
 //TODO: create the mailing routes for user actions as password reset, email verification, etc. USING RESEND
 
+router.post('/verify', verifyUserLogged, async (req, res, next) => {
+    const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
+    if (rows.length === 1) {
+        resend.sendVerificationEmail(rows[0].email, {
+            from: "fundflow By Reasonable <@resend.dev>",
+            subject: 'Email Verification',
+            text: 'Please verify your email address by clicking the link below',
+            html: `<a href="${process.env.FRONTEND_HOST}/verify/${userId}">Verify Email</a>`,
+        });
+        res.status(200).send({ message: 'Verification email sent!' });
+    } else {
+        res.status(404).send({ message: 'User not found!' });
+    }
+});
 module.exports = router;

@@ -1,8 +1,7 @@
 const { Router } = require('express');
 const router = Router();
-const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
-
+const verifyAdminRole = require('../controllers/verifyAdminRole');
 // TODO: this routes are only for admin users
 /**
  * @swagger
@@ -142,7 +141,7 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.post('/', async (req, res) => {
+router.post('/', verifyAdminRole, async (req, res) => {
     try {
         const { name } = req.body;
         if (!name) {
@@ -183,7 +182,7 @@ router.post('/', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyAdminRole, async (req, res) => {
     try {
         const id = req.params.id;
         if (!id) {

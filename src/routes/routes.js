@@ -6,11 +6,11 @@ const jwt = require('jsonwebtoken');
 router.use((req, res, next) => {
     const token = req.headers.authorization;
     if (!token) {
-        req.user = null; // Empty user
+        req.userId = null; // Empty user
     } else {
         try {
-            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-            req.user = decoded;
+            const decoded = jwt.verify(token.toString(), process.env.ACCESS_TOKEN_SECRET);
+            req.userId = decoded.id;
         } catch (err) {
             console.error(err);
             return res.status(401).json({ message: 'Invalid token' });

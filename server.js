@@ -3,7 +3,7 @@ const cors = require('cors');
 const db = require('./src/database/mySqlConnection');
 const mongoose = require('mongoose');
 
-// TODO: add morgan?, jest
+// TODO: add morgan?
 
 const app = express();
 
@@ -33,7 +33,7 @@ const dbConfig = {
 
 db.connect(dbConfig, (err) => {
     if (err) {
-        console.log('Unable to connect to the database (MySQL):', err);
+        console.error('Unable to connect to the database (MySQL):', err);
         process.exit(1);
     } else {
         db.get().query('SELECT NOW() as date;', function (err, rows) {
@@ -51,11 +51,6 @@ db.connect(dbConfig, (err) => {
 const routes = require('./src/routes/routes');
 app.use('/', routes);
 
-// Import models
-import ReviewsProjects from './src/models/reviewsProjects';
-import SrcImages from './src/models/srcImages';
-import StatsProjects from './src/models/statsProjects';
-
 // Connect to MongoDB
 try {
     mongoose.connect(process.env.MONGO_URL + '/fundflow');
@@ -63,27 +58,3 @@ try {
 } catch (error) {
     console.error('Error connecting to MongoDB: ', error.stack);
 }
-
-// Create a new StatsProjects instance with valid idUser
-// const statsProjects = new StatsProjects({
-//     idUser: 1,
-//     idProject: 1,
-//     likes: 0,
-//     shares: 0
-// });
-
-// statsProjects.save()
-//     .then((result) => {
-//         console.log(result);
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
-
-// StatsProjects.find()
-//     .then((data) => {
-//         console.log('StatsProjects data for idUser 1:', data);
-//     })
-//     .catch((error) => {
-//         console.error('Error retrieving StatsProjects data:', error);
-//     });

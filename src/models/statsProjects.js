@@ -8,6 +8,10 @@ const statsProjectSchema = new Schema({
         type: Number,
         required: true
     },
+    idCategory: {
+        type: Number,
+        required: true
+    },
     idProject: {
         type: Number,
         required: true

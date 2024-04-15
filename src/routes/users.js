@@ -2,7 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
-
+const verifyUserLogged = require('../controllers/verifyUserLogged');
 /**
  * @swagger
  * tags:
@@ -73,7 +73,7 @@ const db = require('../database/mySqlConnection');
  *         - name
  *         - lastName
  *         - biography
- * /
+ */
 
 /**
  * @swagger
@@ -157,7 +157,7 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyUserLogged, async (req, res) => {
     try {
         const { id } = req.params;
         const { username, email, name, lastName, biography, currentPassword, newPassword, confirmPassword } = req.body;
@@ -212,6 +212,12 @@ router.put('/:id', async (req, res) => {
  *         description: ID of the user to delete.
  *         schema:
  *           type: integer
+ *       - in: headers
+ *         name: authorization
+ *         required: true
+ *         description: token from the logged user.
+ *         schema:
+ *           type: string
  *     responses:
  *       '200':
  *         description: User deleted successfully
@@ -230,13 +236,14 @@ router.put('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-router.delete('/:id', async (req, res) => {
+
+router.delete('/:id', verifyUserLogged, async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('DELETE FROM categories WHERE id = ?', [req.params.id]);
+        const [rows, fields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.params.id]);
         if (rows.affectedRows === 0) {
-            return res.status(404).json({ message: 'Category not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
-        res.json({ message: 'Category deleted successfully' });
+        res.status(200).json({ message: 'User deleted successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
