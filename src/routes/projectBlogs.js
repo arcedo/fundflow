@@ -130,7 +130,7 @@ router.post('/:id/blog', async (req, res) => {
         return res.status(401).send({ message: 'Unauthorized' });
     }
     try {
-        const userProject = await db.query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
             return res.status(401).send({ message: 'Unauthorized' });
         }
@@ -208,7 +208,7 @@ router.put('/:id/blog/:idBlog', async (req, res) => {
         return res.status(401).send({ message: 'Unauthorized' });
     }
     try {
-        const userProject = await db.query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
             return res.status(401).send({ message: 'Unauthorized' });
         }
@@ -218,8 +218,11 @@ router.put('/:id/blog/:idBlog', async (req, res) => {
             return res.status(400).send({ error: 'Title and content are required!' });
         }
         // Update the blog in the database (MongoDB)
-        const result = await ProjectsBlogs.updateOne({ idProject: req.params.id, _id: req.params.idBlog }, { title: title, content: content });
-        if (result.nModified > 0) {
+        const result = await ProjectsBlogs.updateOne(
+            { idProject: req.params.id, _id: req.params.idBlog }, // Filter
+            { $set: { title: title, content: content } } // Update
+        );
+        if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'Blog updated successfully', id: req.params.idBlog });
         } else {
             res.status(404).send({ error: 'No blog found' });
@@ -271,9 +274,9 @@ router.delete('/:id/blog/:idBlog', async (req, res) => {
         return res.status(401).send({ message: 'Unauthorized' });
     }
     try {
-        const userProject = await db.query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
-            const isAdmin = await db.query('SELECT role FROM users WHERE id = ?', [req.userId]);
+            const isAdmin = await await db.getPromise().query('SELECT role FROM users WHERE id = ?', [req.userId]);
             if (isAdmin.length === 0 || isAdmin[0].role !== 1) {
                 return res.status(401).send({ message: 'Unauthorized' });
             }

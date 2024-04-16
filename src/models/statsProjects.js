@@ -40,4 +40,4 @@ const statsProjectSchema = new Schema({
 
 const StatsProjects = model('StatsProject', statsProjectSchema);
 
-export default StatsProjects;
+module.exports = StatsProjects;

@@ -22,17 +22,17 @@ router.post('/:id/stats', async (req, res) => {
         return res.status(401).send({ message: 'Unauthorized' });
     }
     try {
-        const { idProject, idCategory } = req.body;
-        if (!idProject || !idCategory) {
-            return res.status(400).send({ message: 'idProject and idCategory are required' });
+        const { idCategory } = req.body;
+        if (!idCategory) {
+            return res.status(400).send({ message: 'idCategory are required' });
         }
-        const userViewed = await StatsProjects.findOne({ idUser: req.userId, idProject, idCategory });
+        const userViewed = await StatsProjects.findOne({ idUser: req.userId, idProject: req.params.id, idCategory });
         if (userViewed) {
             return res.status(400).send({ message: 'User already viewed this project' });
         } else {
             const stats = new StatsProjects({
                 idUser: req.userId,
-                idProject,
+                idProject: req.params.id,
                 idCategory,
                 view: true
             });
@@ -46,12 +46,12 @@ router.post('/:id/stats', async (req, res) => {
 });
 
 router.put('/:id/stats', async (req, res) => {
-    const { idUser, idProject, evaluation, fund, collaboration } = req.body;
-    if (!idUser || !idProject || !evaluation) {
-        return res.status(400).send({ message: 'idUser, idProject, evaluation, fund or collaboration are required' });
+    if (!req.userId) {
+        return res.status(401).send({ message: 'Unauthorized' });
     }
     try {
-        const stats = await StatsProjects.findOne({ idUser, idProject });
+        const { evaluation, fund, collaboration } = req.body;
+        const stats = await StatsProjects.findOne({ idUser: (req.userId), idProject: (req.params.id) });
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found' });
         }
@@ -76,7 +76,7 @@ router.put('/:id/stats', async (req, res) => {
     }
 });
 
-router.get('/categoryViewPercentage', async (req, res) => {
+router.get('/stats/percentageViews', async (req, res) => {
     try {
         const result = await StatsProjects.aggregate([
             {
@@ -94,7 +94,7 @@ router.get('/categoryViewPercentage', async (req, res) => {
             }
         ]);
         if (result.length > 0) {
-            let totalViews = map((category) => category.views, result).reduce((acc, curr) => acc + curr, 0);
+            const totalViews = result.map(category => category.views).reduce((acc, curr) => acc + curr, 0);
 
             let categoriesPercentage = [];
             result.forEach(category => {
@@ -104,7 +104,6 @@ router.get('/categoryViewPercentage', async (req, res) => {
                     percentage: percentage.toFixed(2)
                 });
             });
-
             res.status(200).send(categoriesPercentage);
         } else {
             res.status(404).send({ message: 'No projects found' });

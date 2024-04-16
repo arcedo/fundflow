@@ -815,17 +815,12 @@ router.delete('/:id', async (req, res) => {
         return res.status(401).send({ message: 'Unauthorized' });
     }
     try {
-        const statsDeleted = await StatsProjects.deleteMany({ idProject: req.params.id });
-
-        if (statsDeleted.deletedCount > 0) {
-            const rows = await executeQuery('DELETE FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
-            if (rows.affectedRows > 0) {
-                res.status(200).send({ message: 'Project deleted successfully' });
-            } else {
-                res.status(404).send({ message: 'No project found' });
-            }
+        await StatsProjects.deleteMany({ idProject: req.params.id });
+        const rows = await executeQuery('DELETE FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        if (rows.affectedRows > 0) {
+            res.status(200).send({ message: 'Project deleted successfully' });
         } else {
-            res.status(400).send({ message: 'Unable to delete project' });
+            res.status(404).send({ message: 'No project found' });
         }
     } catch (error) {
         console.error('Error in DELETE /:id route:', error);

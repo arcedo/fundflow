@@ -31,6 +31,8 @@ async function login() {
 
 let userData = {};
 
+let createdBlogId = 0;
+
 let createdProjectId = 0;
 describe('projects', () => {
     test('create project without being logged', async () => {
@@ -118,7 +120,46 @@ describe('projects', () => {
         expect(response.status).toBe(200);
     });
 
-    //TODO: PUT ABOUT AND Cover
+    test('create stats project without being logged', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idCategory: testProject.idCategory }),
+        });
+        expect(response.status).toBe(401);
+    });
+
+    test('create stats project', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/stats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            },
+            body: JSON.stringify({ idCategory: testProject.idCategory })
+        });
+        expect(response.status).toBe(201);
+    });
+
+    test('modify stats project', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/stats', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            },
+            body: JSON.stringify({ idProject: createdProjectId, evaluation: 'like' })
+        });
+        expect(response.status).toBe(200);
+    });
+
+    test('get categories view percentage', async () => {
+        const response = await fetch(endPoint + 'projects/stats/percentageViews');
+        const data = await response.json();
+        console.log(data);
+        expect(response.status).toBe(200);
+        expect(data.length).toBeGreaterThan(0);
+    });
 
     test('get projects', async () => {
         const response = await fetch(endPoint + 'projects?startIndex=0&limit=1');
@@ -155,12 +196,77 @@ describe('projects', () => {
         expect(data.length).toBeGreaterThan(0);
     });
 
+    //TODO: PUT ABOUT AND Cover
+
+    test('create project blog without being logged', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: 'title', content: 'content' }),
+        });
+        expect(response.status).toBe(401);
+    });
+
+    test('create project blog', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            },
+            body: JSON.stringify({ title: 'test title blog', content: 'Lorem ipsum dolor a an cora...' })
+        });
+        expect(response.status).toBe(201);
+    });
+
+    test('get project blog', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog');
+        const data = await response.json();
+        expect(response.status).toBe(200);
+        expect(data.length).toBeGreaterThan(0);
+        createdBlogId = data[0]._id;
+    });
+
+    test('modify project blog', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog/' + createdBlogId, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            },
+            body: JSON.stringify({ title: 'test title blog', content: 'some content' })
+        });
+        expect(response.status).toBe(200);
+    });
+
+    test('delete project blog', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog/' + createdBlogId, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            }
+        });
+        expect(response.status).toBe(200);
+    });
+
     test('delete project without being logged', async () => {
         const response = await fetch(endPoint + 'projects/' + createdProjectId, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
         });
         expect(response.status).toBe(401);
+    });
+
+    test('delete project', async () => {
+        const response = await fetch(endPoint + 'projects/' + createdProjectId, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            }
+        });
+        expect(response.status).toBe(200);
     });
 });
 
