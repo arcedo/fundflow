@@ -1,6 +1,9 @@
 const { Router } = require('express');
 const router = Router();
 
+const verifyUserLogged = require('../controllers/verifyUserLogged');
+const verifyAdminRole = require('../controllers/verifyAdminRole');
+
 // Schema
 const SrcImages = require('../models/srcImages');
 
@@ -60,6 +63,10 @@ const SrcImages = require('../models/srcImages');
  */
 router.post('/:id/image', async (req, res) => {
     try {
+        const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        if (userProject.length === 0) {
+            return res.status(401).send({ message: 'Unauthorized' });
+        }
         const { src } = req.body;
         // Validate required fields and their types/format if necessary
         if (!src) {
@@ -120,14 +127,21 @@ router.post('/:id/image', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id/image/:idImage', async (req, res) => {
+router.delete('/:id/image/:idImage', verifyUserLogged, verifyAdminRole, async (req, res) => {
     try {
-        const result = await SrcImages.deleteOne({ idProject: req.params.id, _id: req.params.idImage });
-        if (result.deletedCount > 0) {
-            res.status(200).send({ message: 'Image deleted successfully' });
-        } else {
-            res.status(404).send({ message: 'No image found' });
+        let rows;
+        if (req.admin !== true) {
+            rows = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         }
+        if (rows.length > 0 || req.admin === true) {
+            const result = await SrcImages.deleteOne({ idProject: req.params.id, _id: req.params.idImage });
+            if (result.deletedCount > 0) {
+                res.status(200).send({ message: 'Image deleted successfully' });
+            } else {
+                res.status(404).send({ message: 'No image found' });
+            }
+        }
+
     } catch (error) {
         console.error('Error in DELETE /:id/image/:id route:', error);
         res.status(500).send({ message: 'Internal Server Error' });

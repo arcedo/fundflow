@@ -104,5 +104,5 @@ INSERT INTO categories (name) VALUES ('Art'), ('Music'), ('Books'), ('Games'), (
 -- Admin User
 -- If this user is not created some tests in the backend will fail
 INSERT INTO users (`role`, username, email, hashPassword, verified)
-VALUES (true, 'admin', 'admin@reasonable.dev', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true);
+VALUES (true, 'admin', 'arcedo.marc@gmail.com', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true);
 

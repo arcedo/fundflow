@@ -9,10 +9,7 @@ const testUser = {
     confirmationPassword: 'password'
 };
 
-let createdUserData = {
-    id: 0,
-    token: ''
-};
+let createdUserData = {};
 describe('auth register', () => {
     test('create user without email', async () => {
         const response = await fetch(endPoint + 'register', {
@@ -49,7 +46,6 @@ describe('auth register', () => {
             body: JSON.stringify(testUser),
         });
         const data = await response.json();
-        createdUserData.id = data.id;
         expect(response.status).toBe(201);
     });
 
@@ -109,24 +105,26 @@ describe('auth login', () => {
                 password: testUser.password
             }),
         });
-        const data = await response.json();
-        createdUserData.token = data.token;
+        createdUserData = await response.json();
         expect(response.status).toBe(200);
     });
 });
 
-describe('delete user created', () => {
+describe('auth created delete user', () => {
     test('delete user without token', async () => {
-        const response = await fetch(`${process.env.SERVER_HOST_HTTP}:${process.env.SERVER_PORT}/users/${createdUserData.id}`, {
+        const response = await fetch(`${process.env.SERVER_HOST_HTTP}:${process.env.SERVER_PORT}/users/`, {
             method: 'DELETE',
         });
         expect(response.status).toBe(401);
     });
 
     test('delete user', async () => {
-        const response = await fetch(`${process.env.SERVER_HOST_HTTP}:${process.env.SERVER_PORT}/users/${createdUserData.id}`, {
+        const response = await fetch(`${process.env.SERVER_HOST_HTTP}:${process.env.SERVER_PORT}/users`, {
             method: 'DELETE',
-            headers: { 'Authorization': createdUserData.token },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': createdUserData.token
+            }
         });
         const data = await response.json();
         expect(response.status).toBe(200);

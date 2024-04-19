@@ -96,7 +96,7 @@ router.post('/register', async (req, res, next) => {
         }
         // Check if username already exists or email is already in use
         else {
-            const [rows, fields] = await db.getPromise().query('SELECT username, email  FROM users WHERE email = ? OR username = ?', [email, username]);
+            const [rows, fields] = await db.getPromise().query('SELECT username, email FROM users WHERE email = ? OR username = ?', [email, username]);
             if (rows.length > 0) {
                 const errorValues = {
                     username: rows[0].username === username ? username : undefined,
@@ -113,7 +113,7 @@ router.post('/register', async (req, res, next) => {
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Return token
-                    res.status(201).send({ id: rowsInsert.insertId, token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET) });
+                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET) });
                 } else {
                     res.status(500).send({ message: 'Something went wrong while adding your account!' });
                 }
@@ -183,16 +183,14 @@ router.post('/login', async (req, res, next) => {
     }
 });
 
-//TODO: create the mailing routes for user actions as password reset, email verification, etc. USING RESEND
-
-router.post('/verify', verifyUserLogged, async (req, res, next) => {
+router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
     const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
     if (rows.length === 1) {
         resend.sendVerificationEmail(rows[0].email, {
-            from: "fundflow By Reasonable <@resend.dev>",
+            from: "fundflow By Reasonable <noreply@arcedo.dev>",
             subject: 'Email Verification',
             text: 'Please verify your email address by clicking the link below',
-            html: `<a href="${process.env.FRONTEND_HOST}/verify/${userId}">Verify Email</a>`,
+            html: `<a href="${process.env.FRONTEND_HOST}/verify/${req.userId}">Verify Email</a>`,
         });
         res.status(200).send({ message: 'Verification email sent!' });
     } else {

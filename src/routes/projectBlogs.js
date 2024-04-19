@@ -2,7 +2,8 @@ const { Router } = require('express');
 const router = Router();
 const db = require('../database/mySqlConnection');
 
-//TODO: the admin should be able to delete a blog
+const verifyUserLogged = require('../controllers/verifyUserLogged');
+const verifyAdminRole = require('../controllers/verifyAdminRole');
 
 // Schema
 const ProjectsBlogs = require('../models/blogsProjects');
@@ -125,10 +126,7 @@ router.get('/:id/blog', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.post('/:id/blog', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.post('/:id/blog', verifyUserLogged, async (req, res) => {
     try {
         const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
@@ -203,10 +201,7 @@ router.post('/:id/blog', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id/blog/:idBlog', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.put('/:id/blog/:idBlog', verifyUserLogged, async (req, res) => {
     try {
         const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
@@ -269,23 +264,21 @@ router.put('/:id/blog/:idBlog', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id/blog/:idBlog', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.delete('/:id/blog/:idBlog', verifyUserLogged, verifyAdminRole, async (req, res) => {
     try {
-        const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
-        if (userProject.length === 0) {
-            const isAdmin = await await db.getPromise().query('SELECT role FROM users WHERE id = ?', [req.userId]);
-            if (isAdmin.length === 0 || isAdmin[0].role !== 1) {
-                return res.status(401).send({ message: 'Unauthorized' });
-            }
+        let rows;
+        if (req.admin !== true) {
+            rows = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         }
-        const result = await ProjectsBlogs.deleteOne({ idProject: req.params.id, _id: req.params.idBlog });
-        if (result.deletedCount > 0) {
-            res.status(200).send({ message: 'Blog deleted successfully' });
+        if (rows.length > 0 || req.admin === true) {
+            const result = await ProjectsBlogs.deleteOne({ idProject: req.params.id, _id: req.params.idBlog });
+            if (result.deletedCount > 0) {
+                res.status(200).send({ message: 'Blog deleted successfully' });
+            } else {
+                res.status(404).send({ message: 'No blog found' });
+            }
         } else {
-            res.status(404).send({ message: 'No blog found' });
+            res.status(403).send({ message: 'Forbidden' });
         }
     } catch (error) {
         console.error('Error in DELETE /:id/blog/:idBlog route:', error);

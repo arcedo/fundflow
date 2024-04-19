@@ -2,8 +2,6 @@ const { Router } = require('express');
 const router = Router();
 const db = require('../database/mySqlConnection');
 
-//TODO: idUser from the jwt not passed by the body
-
 const projectBlogs = require('./projectBlogs');
 const projectImages = require('./projectImages');
 const projectStats = require('./projectStats');
@@ -12,6 +10,8 @@ const projectStats = require('./projectStats');
 const StatsProjects = require('../models/statsProjects');
 const SrcImages = require('../models/srcImages');
 
+const verifyUserLogged = require('../controllers/verifyUserLogged');
+const verifyAdminRole = require('../controllers/verifyAdminRole');
 //swagger documentation for projects
 /**
  * @swagger
@@ -175,15 +175,13 @@ async function getProjectStats(projectId) {
 // Example request: /projects?startIndex=0&limit=10
 router.get('/', validateQueryParams, async (req, res) => {
     // Access the validated values from the request object
-    const startIndex = req.startIndex;
-    const limit = req.limit;
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, c.id, u.username as creator, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
             ORDER BY p.creationDate 
             LIMIT ?, ?`,
-            [startIndex, limit]
+            [req.startIndex, req.limit]
         );
         if (rows.length > 0) {
             for (const row of rows) {
@@ -236,31 +234,24 @@ router.get('/', validateQueryParams, async (req, res) => {
  *         description: Internal server error.
  */
 // Example request: /projects/byInterests?startIndex=0&limit=10
-router.get('/byInterests', validateQueryParams, async (req, res) => {
+router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
-        const startIndex = req.startIndex;
-        const limit = req.limit;
-        const userId = req.user;
-        if (userId) {
-            const likedProjectsIds = await StatsProjects.find({ idUser: userId, likes: true }).map((project) => project.idProject);
-            const rows = await executeQuery(
-                `SELECT p.id, c.name, c.id, u.username as creator, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+        const likedProjectsIds = await StatsProjects.find({ idUser: req.userId, likes: true }).map((project) => project.idProject);
+        const rows = await executeQuery(
+            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
                 FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
                 WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN(?)) 
                 LIMIT ?, ?`,
-                [likedProjectsIds, startIndex, limit]
-            );
-            if (rows.length > 0) {
-                for (const row of rows) {
-                    // Merge the stats object with the project object
-                    row.stats = getProjectStats(row.id);
-                }
-                res.status(200).json(rows);
-            } else {
-                res.status(404).send({ message: 'No projects found' });
+            [likedProjectsIds, req.startIndex, req.limit]
+        );
+        if (rows.length > 0) {
+            for (const row of rows) {
+                // Merge the stats object with the project object
+                row.stats = getProjectStats(row.id);
             }
+            res.status(200).json(rows);
         } else {
-            res.status(400).send({ message: 'User ID is missing' });
+            res.status(404).send({ message: 'No projects found' });
         }
     } catch (error) {
         console.error('Error in /byInterests route:', error);
@@ -310,13 +301,11 @@ router.get('/byInterests', validateQueryParams, async (req, res) => {
 // Example request: /projects/byCategory/1?startIndex=0&limit=10
 router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
     try {
-        const startIndex = req.startIndex;
-        const limit = req.limit;
         const rows = await executeQuery(
-            `SELECT p.id, c.name, c.id, u.username as creator, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
             WHERE p.idCategory = ? LIMIT ?, ?`,
-            [req.params.idCategory, startIndex, limit]
+            [req.params.idCategory, req.startIndex, req.limit]
         );
         if (rows.length > 0) {
             for (const row of rows) {
@@ -374,14 +363,35 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
  */
 router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
     try {
-        const startIndex = req.startIndex;
-        const limit = req.limit;
         const rows = await executeQuery(
-            `SELECT p.id, c.name, c.id, u.username as creator, p.title,  p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id)
             WHERE p.idUser = ? 
             LIMIT ?, ?`,
-            [req.params.idUser, startIndex, limit]);
+            [req.params.idUser, req.startIndex, req.limit]);
+        if (rows.length > 0) {
+            for (const row of rows) {
+                // Merge the stats object with the project object
+                row.stats = getProjectStats(row.id);
+            }
+            res.status(200).json(rows);
+        } else {
+            res.status(404).send({ message: 'No projects found' });
+        }
+    } catch (error) {
+        console.error('Error in /byUser route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) => {
+    try {
+        const rows = await executeQuery(
+            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title,  p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id)
+            WHERE p.idUser = ? 
+            LIMIT ?, ?`,
+            [req.userId, req.startIndex, req.limit]);
         if (rows.length > 0) {
             for (const row of rows) {
                 // Merge the stats object with the project object
@@ -432,14 +442,12 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
  */
 router.get('/random', validateQueryParams, async (req, res) => {
     try {
-        const startIndex = req.startIndex;
-        const limit = req.limit;
         const rows = await executeQuery(
-            `SELECT p.id, c.name, c.id, u.username as creator, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
             ORDER BY RAND() 
             LIMIT ?, ?`,
-            [startIndex, limit]
+            [req.startIndex, req.limit]
         );
         if (rows.length > 0) {
             for (const row of rows) {
@@ -487,7 +495,7 @@ router.get('/random', validateQueryParams, async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const rows = await executeQuery(`
-            SELECT p.id, c.name, c.id as idCategory, u.username as creator, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p
             JOIN users u ON p.idUser = u.id
             LEFT JOIN categories c ON p.idCategory = c.id
@@ -534,10 +542,7 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.post('/', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
+router.post('/', verifyUserLogged, async (req, res) => {
     try {
         const { idCategory, title, description, goal, typeGoal, currency, deadlineDate } = req.body;
 
@@ -621,10 +626,7 @@ router.post('/', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.put('/:id', verifyUserLogged, async (req, res) => {
     try {
         const { idCategory, title, description, deadlineDate, goal, currency, typeGoal } = req.body;
         // Validate required fields and their types/format if necessary
@@ -702,7 +704,7 @@ router.put('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id/cover', async (req, res) => {
+router.put('/:id/cover', verifyUserLogged, async (req, res) => {
     try {
         const { cover } = req.body;
         // Validate required fields and their types/format if necessary
@@ -759,7 +761,7 @@ router.put('/:id/cover', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id/about', async (req, res) => {
+router.put('/:id/about', verifyUserLogged, async (req, res) => {
     try {
         const { about } = req.body;
         // Validate required fields and their types/format if necessary
@@ -810,14 +812,17 @@ router.put('/:id/about', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.delete('/:id', verifyUserLogged, verifyAdminRole, async (req, res) => {
     try {
-        await StatsProjects.deleteMany({ idProject: req.params.id });
-        const rows = await executeQuery('DELETE FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        let rows;
+        if (req.admin !== true) {
+            rows = await executeQuery('DELETE FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        } else {
+            rows = await executeQuery('DELETE FROM projects WHERE id = ?', [req.params.id]);
+        }
         if (rows.affectedRows > 0) {
+            await StatsProjects.deleteMany({ idProject: req.params.id });
+            await SrcImages.deleteMany({ idProject: req.params.id });
             res.status(200).send({ message: 'Project deleted successfully' });
         } else {
             res.status(404).send({ message: 'No project found' });

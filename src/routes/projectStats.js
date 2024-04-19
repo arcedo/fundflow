@@ -2,6 +2,7 @@ const { Router } = require('express');
 const router = Router();
 //TODO: Swagger documentation
 const StatsProjects = require('../models/statsProjects');
+const verifyUserLogged = require('../controllers/verifyUserLogged');
 
 router.get('/:id/stats', async (req, res) => {
     try {
@@ -17,10 +18,7 @@ router.get('/:id/stats', async (req, res) => {
     }
 });
 
-router.post('/:id/stats', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.post('/:id/stats', verifyUserLogged, async (req, res) => {
     try {
         const { idCategory } = req.body;
         if (!idCategory) {
@@ -45,10 +43,7 @@ router.post('/:id/stats', async (req, res) => {
     }
 });
 
-router.put('/:id/stats', async (req, res) => {
-    if (!req.userId) {
-        return res.status(401).send({ message: 'Unauthorized' });
-    }
+router.put('/:id/stats', verifyUserLogged, async (req, res) => {
     try {
         const { evaluation, fund, collaboration } = req.body;
         const stats = await StatsProjects.findOne({ idUser: (req.userId), idProject: (req.params.id) });

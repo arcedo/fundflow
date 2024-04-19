@@ -3,6 +3,7 @@ const router = Router();
 const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
+const verifyAdminRole = require('../controllers/verifyAdminRole');
 /**
  * @swagger
  * tags:
@@ -108,7 +109,20 @@ router.get('/:id', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.json(rows[0]);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/', verifyUserLogged, async (req, res) => {
+    try {
+        const [rows, fields] = await db.getPromise().query(`SELECT role, username, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?`, [req.userId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(rows);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
@@ -157,19 +171,18 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-router.put('/:id', verifyUserLogged, async (req, res) => {
+router.put('/', verifyUserLogged, async (req, res) => {
     try {
-        const { id } = req.params;
         const { username, email, name, lastName, biography, currentPassword, newPassword, confirmPassword } = req.body;
         // TODO: Check if the updated data is already used by another user
         if (!username || !email || !name || !lastName || !biography) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.status(400).json({ message: 'These fields are required: username, email, name, last name and biography' });
         }
 
         let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ? WHERE id = ? ';
-        let values = [username, email, name, lastName, biography];
+        const values = [username, email, name, lastName, biography];
         if (currentPassword && newPassword && confirmPassword && newPassword === confirmPassword) {
-            const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [id]);
+            const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
             if (rows.length === 0) {
                 return res.status(404).json({ message: 'User not found' });
             }
@@ -179,18 +192,18 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
                 sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, hashPassword = ? WHERE id = ?';
                 values.push(hashedPassword);
             } else {
-                return res.status(400).json({ message: 'Current password is incorrect' });
+                return res.status(400).json({ message: 'Current password is incorrect', errorValues: { currentPassword } });
             }
         } else {
-            return res.status(400).json({ message: 'Passwords do not match' });
+            return res.status(400).json({ message: 'Passwords do not match', errorValues: { newPassword, confirmPassword } });
         }
 
-        const [rowsResult, fieldsResult] = await db.getPromise().query(sqlQuery, [...values, id]);
+        const [rowsResult, fieldsResult] = await db.getPromise().query(sqlQuery, [...values, req.userId]);
         if (rowsResult.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json({ message: 'User updated successfully', id: req.params.id });
+        res.json({ message: 'User updated successfully', id: req.userId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
@@ -236,14 +249,31 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-
-router.delete('/:id', verifyUserLogged, async (req, res) => {
+//For admin users
+router.delete('/:id', verifyAdminRole, async (req, res) => {
+    if (req.admin !== true) {
+        return res.status(403).json({ message: 'Forbidden' });
+    }
     try {
         const [rows, fields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.params.id]);
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.status(200).json({ message: 'User deleted successfully' });
+        res.status(200).json({ message: 'User deleted successfully', id: req.params.id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+//Delete your own user
+router.delete('/', verifyUserLogged, async (req, res) => {
+    try {
+        const [rows, fields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.userId]);
+        if (rows.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ message: 'User deleted successfully', id: req.userId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });

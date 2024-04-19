@@ -2,17 +2,17 @@ const db = require('../database/mySqlConnection');
 
 async function verifyAdminRole(req, res, next) {
     try {
-        const userId = req.userId;
-        if (!userId) {
+        if (!req.userId) {
             return res.status(401).json({ message: 'Unauthorized' });
         } else {
-            const [rows, fields] = await db.getPromise().query('SELECT role FROM users WHERE id = ?', [userId]);
+            const [rows, fields] = await db.getPromise().query('SELECT role FROM users WHERE id = ?', [req.userId]);
             if (rows.length === 0) {
                 return res.status(404).json({ message: 'User not found' });
             } else if (rows[0].role != true) {
-                return res.status(403).json({ message: 'Forbidden' });
+                req.admin = false;
+            } else {
+                req.admin = true;
             }
-            req.role = 'admin';
             next();
         };
     } catch (err) {

@@ -19,7 +19,7 @@ const testUser = {
     confirmationPassword: 'password'
 };
 
-async function login() {
+async function createNewUser() {
     const response = await fetch(endPoint + 'auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ describe('projects', () => {
     });
 
     test('create project without required values', async () => {
-        userData = await login();
+        userData = await createNewUser();
         const response = await fetch(endPoint + 'projects', {
             method: 'POST',
             headers: {
@@ -156,7 +156,6 @@ describe('projects', () => {
     test('get categories view percentage', async () => {
         const response = await fetch(endPoint + 'projects/stats/percentageViews');
         const data = await response.json();
-        console.log(data);
         expect(response.status).toBe(200);
         expect(data.length).toBeGreaterThan(0);
     });
@@ -183,7 +182,13 @@ describe('projects', () => {
     });
 
     test('get project by user', async () => {
-        const response = await fetch(endPoint + 'projects/byUser/' + userData.id + '?startIndex=0&limit=1');
+        const response = await fetch(endPoint + 'projects/byUser?startIndex=0&limit=1', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            }
+        });
         const data = await response.json();
         expect(response.status).toBe(200);
         expect(data.length).toBeGreaterThan(0);
@@ -195,8 +200,8 @@ describe('projects', () => {
         expect(response.status).toBe(200);
         expect(data.length).toBeGreaterThan(0);
     });
-
-    //TODO: PUT ABOUT AND Cover
+    //TODO: GET by interest
+    //TODO: PUT ABOUT AND Cover /projects and srcImages
 
     test('create project blog without being logged', async () => {
         const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog', {
@@ -268,11 +273,11 @@ describe('projects', () => {
         });
         expect(response.status).toBe(200);
     });
-});
 
-afterAll(async () => {
-    await fetch(`${endPoint}users/${userData.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': userData.token },
+    afterAll(async () => {
+        await fetch(`${endPoint}users/`, {
+            method: 'DELETE',
+            headers: { 'Authorization': userData.token },
+        });
     });
 });

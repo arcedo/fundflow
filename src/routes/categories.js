@@ -2,7 +2,6 @@ const { Router } = require('express');
 const router = Router();
 const db = require('../database/mySqlConnection');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
-// TODO: this routes are only for admin users
 /**
  * @swagger
  * tags:
@@ -142,6 +141,9 @@ router.get('/:id', async (req, res) => {
  *         description: Internal server error.
  */
 router.post('/', verifyAdminRole, async (req, res) => {
+    if (req.admin === false) {
+        return res.status(403).send({ message: 'Forbidden' });
+    }
     try {
         const { name } = req.body;
         if (!name) {
@@ -183,6 +185,9 @@ router.post('/', verifyAdminRole, async (req, res) => {
  *         description: Internal server error.
  */
 router.delete('/:id', verifyAdminRole, async (req, res) => {
+    if (req.admin === false) {
+        return res.status(403).send({ message: 'Forbidden' });
+    }
     try {
         const id = req.params.id;
         if (!id) {

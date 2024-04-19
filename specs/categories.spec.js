@@ -3,8 +3,8 @@ const { describe, expect, test } = require('bun:test');
 const endPoint = `${process.env.SERVER_HOST_HTTP}:${process.env.SERVER_PORT}/`;
 
 const testUser = {
-    username: 'testUser',
-    email: 'user@test.net',
+    username: 'testCategoriesUser',
+    email: 'userCategories@test.net',
     password: 'password',
     confirmationPassword: 'password'
 };
@@ -42,7 +42,7 @@ describe('categories', () => {
             }),
         });
         expect(response.status).toBe(403);
-        await fetch(`${endPoint}users/${nonAdminUser.id}`, {
+        await fetch(`${endPoint}users`, {
             method: 'DELETE',
             headers: { 'Authorization': nonAdminUser.token },
         });
