@@ -5,6 +5,7 @@ const db = require('../database/mySqlConnection');
 const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
 const { Resend } = require('resend');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
+const htmlVerifyMail = require('../../public/htmlVerifyMail');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -186,12 +187,16 @@ router.post('/login', async (req, res, next) => {
 router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
     const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
     if (rows.length === 1) {
-        resend.sendVerificationEmail(rows[0].email, {
+        const { error } = resend.emails.send({
             from: "fundflow By Reasonable <noreply@arcedo.dev>",
+            to: [rows[0].email],
             subject: 'Email Verification',
             text: 'Please verify your email address by clicking the link below',
-            html: `<a href="${process.env.FRONTEND_HOST}/verify/${req.userId}">Verify Email</a>`,
+            html: htmlVerifyMail.replace('idUser', `${req.userId}`),
         });
+        if (error) {
+            res.status(500).send({ message: 'Error sending verification email!', error });
+        }
         res.status(200).send({ message: 'Verification email sent!' });
     } else {
         res.status(404).send({ message: 'User not found!' });

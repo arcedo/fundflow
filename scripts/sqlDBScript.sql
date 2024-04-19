@@ -56,6 +56,23 @@ CREATE TABLE projects (
     FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE tiers (
+	id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+	idProject BIGINT UNSIGNED NOT NULL,
+	description VARCHAR(250),
+	price DOUBLE NOT NULL,
+	srcImage VARCHAR(250),
+	FOREIGN KEY (idProject) REFERENCES projects(id) 
+);
+
+-- Default categories
+INSERT INTO categories (name) VALUES ('Art'), ('Music'), ('Books'), ('Games'), ('Innove'), ('Dev');
+
+-- Admin User
+-- If this user is not created some tests in the backend will fail
+INSERT INTO users (`role`, username, email, hashPassword, verified)
+VALUES (true, 'admin', 'arcedo.marc@gmail.com', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true);
+
 -- CREATE TABLE sponsors (
 --    idProject BIGINT UNSIGNED NOT NULL,
 --    idUser BIGINT UNSIGNED NOT NULL,
@@ -88,21 +105,3 @@ CREATE TABLE projects (
 --     body VARCHAR(250),
 --     FOREIGN KEY (idProject) REFERENCES projects(id)
 -- );
-
-CREATE TABLE tiers (
-	id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
-	idProject BIGINT UNSIGNED NOT NULL,
-	description VARCHAR(250),
-	price DOUBLE UNSIGNED NOT NULL,
-	srcImage VARCHAR(250),
-	FOREIGN KEY (idProject) REFERENCES projects(id) 
-);
-
--- Default categories
-INSERT INTO categories (name) VALUES ('Art'), ('Music'), ('Books'), ('Games'), ('Innove'), ('Dev');
-
--- Admin User
--- If this user is not created some tests in the backend will fail
-INSERT INTO users (`role`, username, email, hashPassword, verified)
-VALUES (true, 'admin', 'arcedo.marc@gmail.com', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true);
-

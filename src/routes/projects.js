@@ -542,6 +542,7 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
+//TODO: only verified users can create projects
 router.post('/', verifyUserLogged, async (req, res) => {
     try {
         const { idCategory, title, description, goal, typeGoal, currency, deadlineDate } = req.body;
