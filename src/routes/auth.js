@@ -192,7 +192,7 @@ router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
             res.status(500).send({ message: 'Error generating token!', error: err });
         }
         const { error } = resend.emails.send({
-            from: "fundflow By Reasonable <noreply@arcedo.dev>",
+            from: "fundflow By Reasonable <noreply@fundflow.arcedo.dev>",
             to: [rows[0].email],
             subject: 'Email Verification',
             text: 'Please verify your email address by clicking the link below',

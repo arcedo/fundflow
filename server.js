@@ -28,8 +28,8 @@ app.listen(port, () => console.log(`URL: ${host}:${port}`));
 const dbConfig = {
     host: process.env.DB_HOST ?? 'localhost',
     port: process.env.DB_PORT ?? 3306,
-    user: process.env.DB_USER ?? 'fundflow',
-    password: process.env.DB_PASSWORD ?? 'y0uNever$ee4CumM4n',
+    user: process.env.DB_USER ?? 'some_user',
+    password: process.env.DB_PASSWORD ?? 'some_password',
     database: process.env.DB_NAME ?? 'fundflow',
 }
 

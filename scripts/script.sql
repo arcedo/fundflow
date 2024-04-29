@@ -1,7 +1,7 @@
 DROP DATABASE IF EXISTS fundflow;
 CREATE DATABASE fundflow;
 
--- CREATE USER 'fundflow'@'%' IDENTIFIED BY 'y0uNever$ee4CumM4n';
+-- CREATE USER 'fundflow'@'%' IDENTIFIED BY 'y0uNeversee4CumM4n';
 -- GRANT ALL PRIVILEGES ON fundflow.* TO 'fundflow'@'%';
 -- FLUSH PRIVILEGES;
 

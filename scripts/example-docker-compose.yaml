@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: fundflow
+      MYSQL_ROOT_PASSWORD: yourRootPassword
+      MYSQL_USER: fundflow
+      MYSQL_PASSWORD: yourPassword
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./script.sql:/docker-entrypoint-initdb.d/script.sql
+    ports:
+      - 3306:3306
+
+  mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fundflow
+      MONGO_INITDB_ROOT_PASSWORD: yourPassword
+    volumes:
+      - ./mongo-data:/data/db
+    ports:
+      - 27017:27017
