@@ -4,6 +4,8 @@ const db = require('./src/database/mySqlConnection');
 const mongoose = require('mongoose');
 
 // TODO: add morgan?
+// TODO: Verify all swagger's documentation might be errors caused by the headers token
+// TODO: Some routes are not implemented in swagger UI
 
 const app = express();
 

@@ -1,6 +1,21 @@
 const { Router } = require('express');
 const router = Router();
 const db = require('../database/mySqlConnection');
+const fs = require('fs');
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/projects'); // specify the directory where you want to store uploaded files
+    },
+    filename: function (req, file, cb) {
+        // Extract the file extension
+        const fileExtension = file.originalname.split('.').pop();
+        // Construct the new file name using the project ID and unique ID
+        const newFileName = `project_${req.params.id}_cover.${fileExtension}`;
+        cb(null, newFileName);
+    }
+});
+const upload = multer({ storage });
 
 const projectBlogs = require('./projectBlogs');
 const projectImages = require('./projectImages');
@@ -177,7 +192,7 @@ router.get('/', validateQueryParams, async (req, res) => {
     // Access the validated values from the request object
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
             ORDER BY p.creationDate 
             LIMIT ?, ?`,
@@ -238,7 +253,7 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
     try {
         const likedProjectsIds = await StatsProjects.find({ idUser: req.userId, likes: true }).map((project) => project.idProject);
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
                 FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
                 WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN(?)) 
                 LIMIT ?, ?`,
@@ -302,7 +317,7 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
 router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
             WHERE p.idCategory = ? LIMIT ?, ?`,
             [req.params.idCategory, req.startIndex, req.limit]
@@ -364,7 +379,7 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
 router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id)
             WHERE p.idUser = ? 
             LIMIT ?, ?`,
@@ -387,7 +402,7 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
 router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title,  p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title,  p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id)
             WHERE p.idUser = ? 
             LIMIT ?, ?`,
@@ -396,6 +411,7 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
             for (const row of rows) {
                 // Merge the stats object with the project object
                 row.stats = getProjectStats(row.id);
+                row.imgs = await SrcImages.find({ idProject: row.id });
             }
             res.status(200).json(rows);
         } else {
@@ -443,7 +459,7 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
 router.get('/random', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
             ORDER BY RAND() 
             LIMIT ?, ?`,
@@ -453,7 +469,7 @@ router.get('/random', validateQueryParams, async (req, res) => {
             for (const row of rows) {
                 // Merge the stats object with the project object
                 row.stats = getProjectStats(row.id);
-                // TODO: add image gallery of the project
+                row.imgs = await SrcImages.find({ idProject: row.id });
             }
             res.status(200).json(rows);
         } else {
@@ -492,15 +508,15 @@ router.get('/random', validateQueryParams, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.get('/:id', async (req, res) => {
+router.get('/:title', async (req, res) => {
     try {
         const rows = await executeQuery(`
-            SELECT p.id, c.name, p.idCategory, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
             FROM projects p
             JOIN users u ON p.idUser = u.id
             LEFT JOIN categories c ON p.idCategory = c.id
-            WHERE p.id = ?;`,
-            [req.params.id]
+            WHERE p.title = ?`,
+            [req.params.title]
         );
         if (rows.length > 0) {
             res.status(200).json(rows[0]);
@@ -542,7 +558,6 @@ router.get('/:id', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-//TODO: only verified users can create projects
 router.post('/', verifyUserLogged, async (req, res) => {
     try {
         const { idCategory, title, description, goal, typeGoal, currency, deadlineDate } = req.body;
@@ -564,17 +579,18 @@ router.post('/', verifyUserLogged, async (req, res) => {
         }
 
         let result;
+        const url = title.replace(/\s+/g, '_').toLowerCase();
         if (typeGoal === 'price' && !currency) {
             return res.status(400).json({ message: 'Currency is required!' });
         } else if (typeGoal === 'price') {
             result = await executeQuery(
-                'INSERT INTO projects (idCategory, idUser, title, description, priceGoal, currency, creationDate, deadlineDate) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)',
-                [idCategory, req.userId, title, description, goal, currency, parsedDeadlineDate]
+                'INSERT INTO projects (idCategory, idUser, title, url, description, priceGoal, currency, creationDate, deadlineDate) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)',
+                [idCategory, req.userId, title, url, description, goal, currency, parsedDeadlineDate]
             );
         } else {
             result = await executeQuery(
-                'INSERT INTO projects (idCategory, idUser, title, description, collGoal, creationDate, deadlineDate) VALUES (?, ?, ?, ?, ?, NOW(), ?)',
-                [idCategory, req.userId, title, description, goal, parsedDeadlineDate]
+                'INSERT INTO projects (idCategory, idUser, title, url, description, collGoal, creationDate, deadlineDate) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)',
+                [idCategory, req.userId, title, url, description, goal, parsedDeadlineDate]
             );
         }
 
@@ -627,7 +643,7 @@ router.post('/', verifyUserLogged, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id', verifyUserLogged, async (req, res) => {
+router.put('/:id', verifyUserLogged, upload.single('cover'), async (req, res) => {
     try {
         const { idCategory, title, description, deadlineDate, goal, currency, typeGoal } = req.body;
         // Validate required fields and their types/format if necessary
@@ -646,14 +662,14 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
         } else if (typeGoal === 'price') {
             // Execute the database query
             const rows = await executeQuery(
-                'UPDATE projects SET idCategory = ?, title = ?, description = ?, collGoal = ?, currency = ?, deadlineDate = ? WHERE id = ?',
-                [idCategory, title, description, goal, currency, parsedDeadlineDate, req.params.id]
+                'UPDATE projects SET idCategory = ?, title = ?, url = ?, description = ?, collGoal = ?, currency = ?, deadlineDate = ? WHERE id = ?',
+                [idCategory, title, title.replace(/\s+/g, '_').toLowerCase(), description, goal, currency, parsedDeadlineDate, req.params.id]
             );
             result = rows;
         } else {
             const rows = await executeQuery(
-                'UPDATE projects SET idCategory = ?, title = ?, description = ?, collGoal = ?, deadlineDate = ? WHERE id = ?',
-                [idCategory, title, description, goal, parsedDeadlineDate, req.params.id]
+                'UPDATE projects SET idCategory = ?, title = ?, url= ?, description = ?, collGoal = ?, deadlineDate = ? WHERE id = ?',
+                [idCategory, title, title.replace(/\s+/g, '_').toLowerCase(), description, goal, parsedDeadlineDate, req.params.id]
             );
             result = rows;
         }
@@ -705,15 +721,22 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id/cover', verifyUserLogged, async (req, res) => {
+router.put('/:id/cover', verifyUserLogged, upload.single('cover'), async (req, res) => {
     try {
-        const { cover } = req.body;
         // Validate required fields and their types/format if necessary
-        if (!cover) {
+        if (!req.file) {
             return res.status(400).send({ message: 'Cover is required!' });
         }
+        const checkAlreadyCover = await executeQuery('SELECT coverImageSrc FROM projects WHERE id = ?', [req.params.id]);
+        if (checkAlreadyCover[0].coverImageSrc) {
+            fs.unlink(checkAlreadyCover[0].coverImageSrc, (err) => {
+                if (err) {
+                    res.send({ message: 'Unable to delete the previous cover image' });
+                }
+            });
+        }
         // Execute the database query
-        const rows = await executeQuery('UPDATE projects SET coverImageSrc = ? WHERE id = ?', [cover, req.params.id]);
+        const rows = await executeQuery('UPDATE projects SET coverImageSrc = ? WHERE id = ?', [req.file.path, req.params.id]);
         // Check if the project was successfully updated
         if (rows.affectedRows > 0) {
             res.status(200).send({ message: 'Project cover updated successfully' });
@@ -722,6 +745,20 @@ router.put('/:id/cover', verifyUserLogged, async (req, res) => {
         }
     } catch (error) {
         console.error('Error in PUT /:id/cover route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+router.get('/:id/cover', async (req, res) => {
+    try {
+        const rows = await executeQuery('SELECT coverImageSrc FROM projects WHERE id = ?', [req.params.id]);
+        if (rows.length > 0) {
+            res.status(200).sendFile(rows[0].coverImageSrc);
+        } else {
+            res.status(404).send({ message: 'No project found' });
+        }
+    } catch (error) {
+        console.error('Error in GET /:id/cover route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
     }
 });

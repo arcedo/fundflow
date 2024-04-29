@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-//TODO: Swagger documentation
+
 const StatsProjects = require('../models/statsProjects');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 
@@ -39,6 +39,21 @@ router.post('/:id/stats', verifyUserLogged, async (req, res) => {
         }
     } catch (error) {
         console.error('Error in POST /:id/stats route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+router.put('/:id/stats/views', verifyUserLogged, async (req, res) => {
+    try {
+        const stats = await StatsProjects.findOne({ idUser: req.userId, idProject: req.params.id });
+        if (!stats) {
+            return res.status(404).send({ message: 'Stats not found' });
+        }
+        stats.view = true;
+        const result = await stats.save();
+        res.status(200).send(result);
+    } catch (err) {
+        console.error('Error in PUT /:id/stats/views route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
     }
 });

@@ -1,9 +1,34 @@
 const { Router } = require('express');
 const router = Router();
-const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
+const fs = require('fs');
+const multer = require('multer');
+const storageProfilePicture = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/users');
+    },
+    filename: function (req, file, cb) {
+        const fileExtension = file.originalname.split('.').pop();
+        const timestamp = Date.now();
+        const newFileName = `user_${req.params.id}.${fileExtension}`;
+        cb(null, newFileName);
+    }
+});
+const storageProfileCover = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/users');
+    },
+    filename: function (req, file, cb) {
+        const fileExtension = file.originalname.split('.').pop();
+        const timestamp = Date.now();
+        const newFileName = `user_${req.params.id}_cover.${fileExtension}`;
+        cb(null, newFileName);
+    }
+});
+const uploadProfilePicture = multer({ storage: storageProfilePicture });
+const uploadProfileCover = multer({ storage: storageProfileCover });
 /**
  * @swagger
  * tags:
@@ -105,7 +130,7 @@ const verifyAdminRole = require('../controllers/verifyAdminRole');
  */
 router.get('/:id', async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT role, username, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?', [req.params.id]);
+        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?', [req.params.id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -118,7 +143,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', verifyUserLogged, async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query(`SELECT role, username, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?`, [req.userId]);
+        const [rows, fields] = await db.getPromise().query(`SELECT role, username, url, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?`, [req.userId]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -174,13 +199,15 @@ router.get('/', verifyUserLogged, async (req, res) => {
 router.put('/', verifyUserLogged, async (req, res) => {
     try {
         const { username, email, name, lastName, biography, currentPassword, newPassword, confirmPassword } = req.body;
-        // TODO: Check if the updated data is already used by another user
         if (!username || !email || !name || !lastName || !biography) {
             return res.status(400).json({ message: 'These fields are required: username, email, name, last name and biography' });
         }
-
-        let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ? WHERE id = ? ';
-        const values = [username, email, name, lastName, biography];
+        const verifyNoUserWithSameData = await db.getPromise().query('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?', [username, email, req.userId]);
+        if (verifyNoUserWithSameData.length > 0) {
+            return res.status(400).json({ message: 'Username or email already in use', errorValues: { username, email } });
+        }
+        let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, url = ?';
+        const values = [username, email, name, lastName, biography, url = username.replace(/\s+/g, '_').toLowerCase()];
         if (currentPassword && newPassword && confirmPassword && newPassword === confirmPassword) {
             const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
             if (rows.length === 0) {
@@ -189,7 +216,7 @@ router.put('/', verifyUserLogged, async (req, res) => {
             const passwordMatch = await Bun.password.verify(currentPassword, rows[0].hashPassword);
             if (passwordMatch) {
                 const hashedPassword = await Bun.password.hash(newPassword);
-                sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, hashPassword = ? WHERE id = ?';
+                sqlQuery += ', hashPassword = ?';
                 values.push(hashedPassword);
             } else {
                 return res.status(400).json({ message: 'Current password is incorrect', errorValues: { currentPassword } });
@@ -197,7 +224,7 @@ router.put('/', verifyUserLogged, async (req, res) => {
         } else {
             return res.status(400).json({ message: 'Passwords do not match', errorValues: { newPassword, confirmPassword } });
         }
-
+        sqlQuery += ' WHERE id = ?';
         const [rowsResult, fieldsResult] = await db.getPromise().query(sqlQuery, [...values, req.userId]);
         if (rowsResult.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
@@ -280,6 +307,45 @@ router.delete('/', verifyUserLogged, async (req, res) => {
     }
 });
 
-// TODO: Two PUT routes one for the user image and another for the cover image
+// Profile Images
+router.put('/:id/profilePicture', verifyUserLogged, uploadProfilePicture.single('profilePicture'), async (req, res) => {
+    try {
+        const verifyExistingProfilePicture = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.params.id]);
+        if (verifyExistingProfilePicture.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (verifyExistingProfilePicture[0].profilePictureSrc) {
+            fs.unlinkSync(verifyExistingProfilePicture[0].profilePictureSrc);
+        }
+        const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.params.id]);
+        if (rows.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ message: 'Profile picture updated successfully', id: req.params.id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.put('/:id/profileCover', verifyUserLogged, uploadProfileCover.single('profileCover'), async (req, res) => {
+    try {
+        const verifyExistingProfileCover = await db.getPromise().query('SELECT bannerPictureSrc FROM users WHERE id = ?', [req.params.id]);
+        if (verifyExistingProfileCover.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (verifyExistingProfileCover[0].bannerPictureSrc) {
+            fs.unlinkSync(verifyExistingProfileCover[0].bannerPictureSrc);
+        }
+        const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.params.id]);
+        if (rows.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ message: 'Profile cover updated successfully', id: req.params.id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 module.exports = router;

@@ -1,4 +1,9 @@
+import { json } from 'express';
+
 const { describe, expect, test, afterAll } = require('bun:test');
+
+const fs = require('fs');
+const FormData = require('form-data');
 
 const endPoint = `${process.env.SERVER_HOST_HTTP}:${process.env.SERVER_PORT}/`;
 
@@ -34,6 +39,8 @@ let userData = {};
 let createdBlogId = 0;
 
 let createdProjectId = 0;
+let createdProjectTite = '';
+
 describe('projects', () => {
     test('create project without being logged', async () => {
         const response = await fetch(endPoint + 'projects', {
@@ -165,10 +172,11 @@ describe('projects', () => {
         const data = await response.json();
         expect(response.status).toBe(200);
         expect(data.length).toBeGreaterThan(0);
+        createdProjectTite = data[0].title;
     });
 
     test('get project', async () => {
-        const response = await fetch(endPoint + 'projects/' + createdProjectId);
+        const response = await fetch(endPoint + 'projects/' + createdProjectTite);
         const data = await response.json();
         expect(response.status).toBe(200);
         expect(data.id).toBe(createdProjectId);
@@ -200,8 +208,7 @@ describe('projects', () => {
         expect(response.status).toBe(200);
         expect(data.length).toBeGreaterThan(0);
     });
-    //TODO: GET by interest
-    //TODO: PUT ABOUT AND Cover /projects and srcImages
+    //TODO: GET by interest, Like project, View Project, Dislike...
 
     test('create project blog without being logged', async () => {
         const response = await fetch(endPoint + 'projects/' + createdProjectId + '/blog', {

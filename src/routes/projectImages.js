@@ -1,8 +1,25 @@
 const { Router } = require('express');
 const router = Router();
+const fs = require('fs');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/projects'); // specify the directory where you want to store uploaded files
+    },
+    filename: function (req, file, cb) {
+        // Extract the file extension
+        const fileExtension = file.originalname.split('.').pop();
+        const timestamp = Date.now(); // Get the current timestamp
+        const newFileName = `project_${req.params.id}_img_${timestamp}.${fileExtension}`;
+        // Construct the new file name using the project ID and unique ID
+        cb(null, newFileName);
+    }
+});
+const upload = multer({ storage });
 
 // Schema
 const SrcImages = require('../models/srcImages');
@@ -24,6 +41,24 @@ const SrcImages = require('../models/srcImages');
  *       required:
  *         - src
  */
+
+router.get('/:id/img/:img', async (req, res) => {
+    const projectImgsSrc = await SrcImages.find({ idProject: req.params.id, src: req.params.img });
+    if (projectImgsSrc.length > 0) {
+        res.status(200).sendFile(__dirname + `/uploads/projects/${req.params.img}`);
+    } else {
+        res.status(404).send({ message: 'No images found' });
+    }
+});
+
+router.get('/:id/srcImgs', async (req, res) => {
+    const projectImgsSrc = await SrcImages.find({ idProject: req.params.id });
+    if (projectImgsSrc.length > 0) {
+        res.status(200).send(projectImgsSrc);
+    } else {
+        res.status(404).send({ message: 'No images found' });
+    }
+});
 
 /**
  * @swagger
@@ -61,30 +96,29 @@ const SrcImages = require('../models/srcImages');
  *       '500':
  *         description: Internal server error.
  */
-router.post('/:id/image', async (req, res) => {
+router.post('/:id/image', verifyUserLogged, upload.single('image'), async (req, res) => {
     try {
-        const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
-        if (userProject.length === 0) {
-            return res.status(401).send({ message: 'Unauthorized' });
+        if (!req.file) {
+            return res.status(400).send({ message: 'Image is missing' });
         }
-        const { src } = req.body;
-        // Validate required fields and their types/format if necessary
-        if (!src) {
-            return res.status(400).send({ error: 'Src is required!' });
-        }
-        // Save the image source in the database (MongoDB)
-        const savedImgSrc = new SrcImages({
-            idProject: req.params.id,
-            src: src
-        });
-        savedImgSrc.save()
-            .then((result) => {
-                res.status(201).send({ message: 'Image created successfully' });
-            })
-            .catch((error) => {
-                console.error('Error saving image source in MongoDB:', error);
-                res.status(400).send({ message: 'Unable to create image' });
+        const verifyExistingProject = await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
+        if (verifyExistingProject.length > 0) {
+            // Save the image source in the database (MongoDB)
+            const savedImgSrc = new SrcImages({
+                idProject: req.params.id,
+                src: req.file.path
             });
+            savedImgSrc.save()
+                .then((result) => {
+                    res.status(201).send({ message: 'Image created successfully', id: result._id });
+                })
+                .catch((error) => {
+                    console.error('Error saving image source in MongoDB:', error);
+                    res.status(400).send({ message: 'Unable to create image' });
+                });
+        } else {
+            res.status(403).send({ message: 'Forbidden' });
+        }
     } catch (error) {
         console.error('Error in POST /:id/image route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -127,21 +161,23 @@ router.post('/:id/image', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id/image/:idImage', verifyUserLogged, verifyAdminRole, async (req, res) => {
+router.delete('/:id/image/', verifyUserLogged, verifyAdminRole, async (req, res) => {
     try {
         let rows;
         if (req.admin !== true) {
             rows = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         }
         if (rows.length > 0 || req.admin === true) {
-            const result = await SrcImages.deleteOne({ idProject: req.params.id, _id: req.params.idImage });
+            const result = await SrcImages.deleteOne({ idProject: req.params.id, src: req.body.src });
             if (result.deletedCount > 0) {
+                fs.unlinkSync(req.body.src);
                 res.status(200).send({ message: 'Image deleted successfully' });
             } else {
                 res.status(404).send({ message: 'No image found' });
             }
+        } else {
+            res.status(403).send({ message: 'Forbidden' });
         }
-
     } catch (error) {
         console.error('Error in DELETE /:id/image/:id route:', error);
         res.status(500).send({ message: 'Internal Server Error' });

@@ -1,146 +1,199 @@
-const htmlVerifyMail = `<!DOCTYPE html>
+const htmlVerifyMail = `<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fundflow by Reasonable</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>fundflow by Reasonable</title>
+  <style media="all" type="text/css">
+    @media all {
+      .btn-primary table td:hover {
+        background-color: #ec0867 !important;
+      }
 
-        body {
-            color: #222;
-            /* f1f1f1 */
-            background-color: #f1f1f1;
-            margin: 0;
-            padding: 0;
-            padding-top: 2.5rem;
-            font-family: 'DM Sans', sans-serif;
-        }
+      .btn-primary a:hover {
+        background-color: #ec0867 !important;
+        border-color: #ec0867 !important;
+      }
+    }
 
-        a {
-            text-decoration: none;
-            color: #222;
-        }
+    @media only screen and (max-width: 640px) {
 
-        main {
-            width: 40%;
-            padding: 30px 29px;
-            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-            border-radius: 0.25rem;
-            margin: auto;
-            background-color: #fdfdfd;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+      .main p,
+      .main td,
+      .main span {
+        font-size: 16px !important;
+      }
 
-        img {
-            width: 55px;
-            border-radius: 5px;
-        }
+      .wrapper {
+        padding: 8px !important;
+      }
 
-        h1 span {
-            font-family: 'Josefin Sans', sans-serif;
-        }
+      .content {
+        padding: 0 !important;
+      }
 
-        h1>p {
-            font-size: 1.5rem;
-        }
+      .container {
+        padding: 0 !important;
+        padding-top: 8px !important;
+        width: 100% !important;
+      }
 
-        h1 {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-        }
+      .main {
+        border-left-width: 0 !important;
+        border-radius: 0 !important;
+        border-right-width: 0 !important;
+      }
 
-        h1>a,
-        h2 {
-            font-family: 'Montserrat', sans-serif;
-        }
+      .btn table {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
 
-        h1,
-        h2,
-        p {
-            margin: 0;
-            padding: 0;
-        }
+      .btn a {
+        font-size: 16px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+    }
 
-        footer p:last-child {
-            font-weight: 500;
-        }
+    @media all {
+      .ExternalClass {
+        width: 100%;
+      }
 
-        footer span {
-            font-family: 'Josefin Sans', sans-serif;
-            font-weight: 700;
-        }
+      .ExternalClass,
+      .ExternalClass p,
+      .ExternalClass span,
+      .ExternalClass font,
+      .ExternalClass td,
+      .ExternalClass div {
+        line-height: 100%;
+      }
 
-        section hr:first-child {
-            margin-bottom: 1rem;
-        }
+      .apple-link a {
+        color: inherit !important;
+        font-family: inherit !important;
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+        text-decoration: none !important;
+      }
 
-        section hr:last-child {
-            margin-top: 1rem;
-        }
-
-        h2 {
-            padding: 0 0 0.65rem 0;
-        }
-
-        section>div>a {
-            padding: 0.5rem 1rem;
-            width: 33.33%;
-            margin: auto;
-            background-image: linear-gradient(to right, #c99df4, #ff8b20);
-            color: #fdfdfd;
-            border-radius: 0.25rem;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        section>div {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        section p>a {
-            color: #222;
-            border-bottom: solid 1px #222;
-        }
-    </style>
+      #MessageViewBody a {
+        color: inherit;
+        text-decoration: none;
+        font-size: inherit;
+        font-family: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+      }
+    }
+  </style>
 </head>
 
-<body>
-    <main>
-        <header>
-            <h1>
-                <a href="https://fundflow.arcedo.dev" target="_blank">
-                    <img src="./public/fundflow.png" alt="fundflow logo">
-                    fundflow.
-                </a>
-                <p>by <span>Reasonable</span></p>
+<body
+  style="font-family: Helvetica, sans-serif; -webkit-font-smoothing: antialiased; font-size: 16px; line-height: 1.3; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; background-color: #f4f5f6; margin: 0; padding: 0;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body"
+    style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f4f5f6; width: 100%;"
+    width="100%" bgcolor="#f4f5f6">
+    <tr>
+      <td style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top;" valign="top">&nbsp;</td>
+      <td class="container"
+        style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; max-width: 600px; padding: 0; padding-top: 24px; width: 600px; margin: 0 auto;"
+        width="600" valign="top">
+        <div class="content"
+          style="box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px; padding: 0;">
+
+          <!-- START CENTERED WHITE CONTAINER -->
+          <div class="preheader" style="padding-bottom: 20px;">
+            <h1 style="margin: auto; width: fit-content;">
+              <a href="https://fundflow.arcedo.dev" target="_blank" style="text-decoration: none; color: inherit;">
+                <!-- <img src="./fundflow.png" alt="fundflow logo" style="width: 40px; border-radius: 5px;"> -->
+                fundflow.
+              </a>
             </h1>
-        </header>
-        <section>
-            <hr>
-            <h2>One last step</h2>
-            <div>
-                <p>Please verify your email address by clicking the link below:</p>
-                <a href="https://fundflow.arcedo.dev/verify/idUser" target="_blank">Verify</a>
-                <p>You are receiving this email because you signed up for fundflow. If you believe this is a mistake,
-                    please
-                    contact
-                    us at <a href="mailto:info@fundflow.arcedo.dev">info@fundflow.arcedo.dev</a>.</p>
-            </div>
-            <hr>
-        </section>
-        <footer>
-            <p>Thanks,</p>
-            <p>The <span>Reasonable</span> Team.</p>
-        </footer>
-    </main>
+            <p style="margin: auto; width: fit-content;">by <span style="font-weight: bolder;">Reasonable</span></p>
+          </div>
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main"
+            style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background: #ffffff; border: 1px solid #eaebed; border-radius: 16px; width: 100%;"
+            width="100%">
+
+            <!-- START MAIN CONTENT AREA -->
+            <tr>
+              <td class="wrapper"
+                style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 24px;"
+                valign="top">
+                <h2
+                  style="font-family: Helvetica, sans-serif; font-size: 20px; font-weight: bold; margin: 0; margin-bottom: 16px;">
+                  One last step</h2>
+                <p
+                  style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+                  Please verify your email address by clicking the link below:
+                </p>
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary"
+                  style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; box-sizing: border-box; width: 100%; min-width: 100%;"
+                  width="100%">
+                  <tbody>
+                    <tr>
+                      <td align="center"
+                        style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 16px;"
+                        valign="top">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                          style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
+                          <tbody>
+                            <tr>
+                              <td
+                                style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; border-radius: 4px; text-align: center; background-color: #0867ec;"
+                                valign="top" align="center" bgcolor="#0867ec"> <a href="${process.env.SERVER_HOST_HTTP + ':' + process.env.SERVER_PORT}/auth/verifyEmail/idUser"
+                                  target="_blank"
+                                  style="border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: bold; margin: 0; padding: 12px 24px; text-decoration: none; text-transform: capitalize; background-image: linear-gradient(to right, #c99df4, #ff8b20); color: #fdfdfd;">
+                                  Verify</a> </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p
+                  style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+                  You are receiving this email because you signed up for fundflow. If you believe this is a mistake,
+                  please
+                  contact
+                  us at <a href="mailto:info@fundflow.arcedo.dev">info@fundflow.arcedo.dev</a>.</p>
+                <p
+                  style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 5px;">
+                  Thanks,</p>
+                <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0;">
+                  The <span style="font-weight: bolder;">Reasonable</span> Team.</p>
+              </td>
+            </tr>
+
+            <!-- END MAIN CONTENT AREA -->
+          </table>
+
+          <!-- START FOOTER -->
+          <div class="footer" style="clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+              style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;"
+              width="100%">
+              <tr>
+                <td class="content-block"
+                  style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;"
+                  valign="top" align="center">
+                  <span class="apple-link" style="color: #9a9ea6; font-size: 16px; text-align: center;">
+                    Do not reply to this email, this is an auto-generated email.
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </td>
+      <td style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top;" valign="top">&nbsp;</td>
+    </tr>
+  </table>
 </body>
 
 </html>`;

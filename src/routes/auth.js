@@ -109,8 +109,8 @@ router.post('/register', async (req, res, next) => {
             else {
                 const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
                 const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                    'INSERT INTO users (username, email, hashPassword, registerDate) VALUES (?, ?, ?, ?);',
-                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions)]
+                    'INSERT INTO users (username, email, hashPassword, registerDate, url) VALUES (?, ?, ?, ?, ?);',
+                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), username.replace(/\s+/g, '_').toLowerCase()]
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Return token
@@ -187,12 +187,16 @@ router.post('/login', async (req, res, next) => {
 router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
     const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
     if (rows.length === 1) {
+        const code = jwt.sign({ id: req.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+        if (!code) {
+            res.status(500).send({ message: 'Error generating token!', error: err });
+        }
         const { error } = resend.emails.send({
             from: "fundflow By Reasonable <noreply@arcedo.dev>",
             to: [rows[0].email],
             subject: 'Email Verification',
             text: 'Please verify your email address by clicking the link below',
-            html: htmlVerifyMail.replace('idUser', `${req.userId}`),
+            html: htmlVerifyMail.replace('idUser', `${code}`),
         });
         if (error) {
             res.status(500).send({ message: 'Error sending verification email!', error });
@@ -200,6 +204,23 @@ router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
         res.status(200).send({ message: 'Verification email sent!' });
     } else {
         res.status(404).send({ message: 'User not found!' });
+    }
+});
+
+router.get('/verifyEmail/:code', async (req, res, next) => {
+    const { code } = req.params;
+    try {
+        const decoded = jwt.verify(code, process.env.ACCESS_TOKEN_SECRET);
+        if (decoded.exp < Date.now() / 1000) {
+            return res.status(400).send({ message: 'Token expired!' });
+        }
+        const [rows, fields] = await db.getPromise().query("UPDATE users SET verifiedEmail = true WHERE id = ?", [decoded.id]);
+        if (rows.affectedRows === 0) {
+            res.status(500).send({ message: 'Error updating user!', error: err });
+        }
+        res.status(200).send({ message: 'Email verified!' });
+    } catch (err) {
+        res.status(500).send({ message: 'Error verifying email!', error: err });
     }
 });
 module.exports = router;
