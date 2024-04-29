@@ -25,10 +25,13 @@ const projects = require('./projects');
 const categories = require('./categories');
 const users = require('./users');
 
-router.use('/', apiDocs);
+router.use('/api-docs', apiDocs);
 router.use('/auth', auth);
 router.use('/projects', projects);
 router.use('/categories', categories);
 router.use('/users', users);
+router.get('/', (req, res) => {
+    res.status(200).send({ message: 'Welcome to FundFlow API' });
+});
 
 module.exports = router;
