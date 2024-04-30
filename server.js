@@ -10,8 +10,14 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// Allow requests from any origin during development
+const corsOptions = {
+    origin: '*' // This allows requests from any origin
+};
+
 // Configuration
 app.use(express.json());
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads/projects', express.static(path.join(__dirname, 'uploads/projects')));
 app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads/profiles')));
