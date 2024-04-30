@@ -4,20 +4,10 @@ const db = require('./src/database/mySqlConnection');
 const path = require('path');
 const mongoose = require('mongoose');
 
-// TODO: add morgan?
-// TODO: Verify all swagger's documentation might be errors caused by the headers token
-// TODO: Some routes are not implemented in swagger UI
-
 const app = express();
-
-// Allow requests from any origin during development
-const corsOptions = {
-    origin: '*' // This allows requests from any origin
-};
 
 // Configuration
 app.use(express.json());
-app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads/projects', express.static(path.join(__dirname, 'uploads/projects')));
 app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads/profiles')));
@@ -27,6 +17,9 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something went wrong!');
 });
+
+// Allow requests from any origin during development
+app.use(cors());
 
 // Port & host
 const port = process.env.SERVER_PORT ?? 3001;
