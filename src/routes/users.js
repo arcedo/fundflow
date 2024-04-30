@@ -328,9 +328,9 @@ router.put('/:id/profilePicture', verifyUserLogged, uploadProfilePicture.single(
     }
 });
 
-router.get('/:id/profilePicture', async (req, res) => {
+router.get('/:username/profilePicture', async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.params.id]);
+        const [rows, fields] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE username = ?', [req.params.username]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }

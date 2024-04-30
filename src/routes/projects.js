@@ -193,7 +193,7 @@ router.get('/', validateQueryParams, async (req, res) => {
     // Access the validated values from the request object
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
             ORDER BY p.creationDate 
             LIMIT ?, ?`,
@@ -254,7 +254,7 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
     try {
         const likedProjectsIds = await StatsProjects.find({ idUser: req.userId, likes: true }).map((project) => project.idProject);
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
                 FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
                 WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN(?)) 
                 LIMIT ?, ?`,
@@ -318,7 +318,7 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
 router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
             WHERE p.idCategory = ? LIMIT ?, ?`,
             [req.params.idCategory, req.startIndex, req.limit]
@@ -380,7 +380,7 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
 router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id)
             WHERE p.idUser = ? 
             LIMIT ?, ?`,
@@ -403,7 +403,7 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
 router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id)
             WHERE p.idUser = ? 
             LIMIT ?, ?`,
@@ -460,7 +460,7 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
 router.get('/random', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
             ORDER BY RAND() 
             LIMIT ?, ?`,
@@ -512,7 +512,7 @@ router.get('/random', validateQueryParams, async (req, res) => {
 router.get('/:titleUrl', async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, u.profilePictureSrc, p.coverImageSrc
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p
             JOIN users u ON p.idUser = u.id
             LEFT JOIN categories c ON p.idCategory = c.id
