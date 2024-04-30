@@ -328,6 +328,22 @@ router.put('/:id/profilePicture', verifyUserLogged, uploadProfilePicture.single(
     }
 });
 
+router.get('/:id/profilePicture', async (req, res) => {
+    try {
+        const [rows, fields] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (!rows[0].profilePictureSrc) {
+            return res.status(404).json({ message: 'Profile picture not found' });
+        }
+        res.sendFile(path.join(__dirname, '../../uploads/profiles', rows[0].profilePictureSrc));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 router.put('/:id/profileCover', verifyUserLogged, uploadProfileCover.single('profileCover'), async (req, res) => {
     try {
         const verifyExistingProfileCover = await db.getPromise().query('SELECT bannerPictureSrc FROM users WHERE id = ?', [req.params.id]);
@@ -342,6 +358,22 @@ router.put('/:id/profileCover', verifyUserLogged, uploadProfileCover.single('pro
             return res.status(404).json({ message: 'User not found' });
         }
         res.status(200).json({ message: 'Profile cover updated successfully', id: req.params.id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/:id/profileCover', async (req, res) => {
+    try {
+        const [rows, fields] = await db.getPromise().query('SELECT bannerPictureSrc FROM users WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (!rows[0].bannerPictureSrc) {
+            return res.status(404).json({ message: 'Profile cover not found' });
+        }
+        res.sendFile(path.join(__dirname, '../../uploads/profiles', rows[0].bannerPictureSrc));
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });

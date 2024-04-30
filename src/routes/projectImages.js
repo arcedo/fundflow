@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const fs = require('fs');
+const path = require('path');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
@@ -45,7 +46,7 @@ const SrcImages = require('../models/srcImages');
 router.get('/:id/img/:img', async (req, res) => {
     const projectImgsSrc = await SrcImages.find({ idProject: req.params.id, src: req.params.img });
     if (projectImgsSrc.length > 0) {
-        res.status(200).sendFile(__dirname + `/uploads/projects/${req.params.img}`);
+        res.status(200).sendFile(path.join(__dirname, '../../uploads/projects', req.params.img));
     } else {
         res.status(404).send({ message: 'No images found' });
     }

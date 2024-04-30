@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./src/database/mySqlConnection');
+const path = require('path');
 const mongoose = require('mongoose');
 
 // TODO: add morgan?
@@ -12,6 +13,8 @@ const app = express();
 // Configuration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads/projects', express.static(path.join(__dirname, 'uploads/projects')));
+app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads/profiles')));
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

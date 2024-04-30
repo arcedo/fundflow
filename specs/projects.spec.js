@@ -172,7 +172,6 @@ describe('projects', () => {
         const data = await response.json();
         expect(response.status).toBe(200);
         expect(data.length).toBeGreaterThan(0);
-        console.log(data);
         createdProjectTite = data[0].projectUrl;
     });
 
