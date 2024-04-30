@@ -4,6 +4,7 @@ const db = require('../database/mySqlConnection');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
 const fs = require('fs');
+const path = require('path');
 const multer = require('multer');
 const storageProfilePicture = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -337,7 +338,7 @@ router.get('/:userUrl/profilePicture', async (req, res) => {
         if (!rows[0].profilePictureSrc) {
             return res.status(404).json({ message: 'Profile picture not found' });
         }
-        res.sendFile(path.join(__dirname, '../../uploads/profiles', rows[0].profilePictureSrc));
+        res.sendFile(path.join(__dirname, '../../', rows[0].profilePictureSrc));
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });

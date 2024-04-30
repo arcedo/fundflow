@@ -754,7 +754,7 @@ router.get('/:id/cover', async (req, res) => {
     try {
         const rows = await executeQuery('SELECT coverImageSrc FROM projects WHERE id = ?', [req.params.id]);
         if (rows.length > 0) {
-            res.status(200).sendFile(path.join(__dirname, '../../uploads/projects', rows[0].coverImageSrc));
+            res.status(200).sendFile(path.join(__dirname, '../../', rows[0].coverImageSrc));
         } else {
             res.status(404).send({ message: 'No project found' });
         }
