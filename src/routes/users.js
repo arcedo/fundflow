@@ -7,7 +7,7 @@ const fs = require('fs');
 const multer = require('multer');
 const storageProfilePicture = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './uploads/users');
+        cb(null, './uploads/profiles');
     },
     filename: function (req, file, cb) {
         const fileExtension = file.originalname.split('.').pop();
@@ -18,7 +18,7 @@ const storageProfilePicture = multer.diskStorage({
 });
 const storageProfileCover = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './uploads/users');
+        cb(null, './uploads/profiles');
     },
     filename: function (req, file, cb) {
         const fileExtension = file.originalname.split('.').pop();
