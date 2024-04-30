@@ -8,18 +8,17 @@ const app = express();
 
 // Configuration
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads/projects', express.static(path.join(__dirname, 'uploads/projects')));
 app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads/profiles')));
+
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something went wrong!');
 });
-
-// Allow requests from any origin during development
-app.use(cors());
 
 // Port & host
 const port = process.env.SERVER_PORT ?? 3001;
@@ -57,7 +56,8 @@ app.use('/', routes);
 
 // Connect to MongoDB
 try {
-    mongoose.connect(process.env.MONGO_URL + '/fundflow');
+    mongoose.connect(process.env.MONGO_URL, { dbName: 'fundflow' });
+
     console.log('MongoDB: Connected to MongoDB fundflow successfully');
 } catch (error) {
     console.error('Error connecting to MongoDB: ', error.stack);
