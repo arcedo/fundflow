@@ -45,9 +45,9 @@ const SrcImages = require('../models/srcImages');
  */
 
 router.get('/:id/image/:img', async (req, res) => {
-    const projectImgsSrc = await SrcImages.find({ idProject: req.params.id, src: req.params.img });
-    if (projectImgsSrc.length > 0) {
-        res.status(200).sendFile(path.join(__dirname, '../../uploads/projects', req.params.img));
+    const projectImg = await SrcImages.find({ idProject: req.params.id, _id: req.params.img });
+    if (projectImg.length > 0) {
+        res.status(200).sendFile(path.join(__dirname, '../../', projectImg[0].src));
     } else {
         res.status(404).send({ message: 'No images found' });
     }
