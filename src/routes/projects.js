@@ -509,6 +509,27 @@ router.get('/random', validateQueryParams, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
+router.get('/byId/:id', async (req, res) => {
+    try {
+        const rows = await executeQuery(
+            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+            FROM projects p
+            JOIN users u ON p.idUser = u.id
+            LEFT JOIN categories c ON p.idCategory = c.id
+            WHERE p.id = ?`,
+            [req.params.id]
+        );
+        if (rows.length > 0) {
+            res.status(200).json(rows[0]);
+        } else {
+            res.status(404).send({ message: 'No project found' });
+        }
+    } catch (error) {
+        console.error('Error in /:id route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
 router.get('/:titleUrl', async (req, res) => {
     try {
         const rows = await executeQuery(

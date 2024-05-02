@@ -7,7 +7,7 @@ const srcImagesSchema = new Schema({
         type: Number,
         required: true
     },
-    srcImage: {
+    src: {
         type: String,
         required: true
     },

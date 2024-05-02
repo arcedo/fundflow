@@ -44,7 +44,7 @@ const SrcImages = require('../models/srcImages');
  *         - src
  */
 
-router.get('/:id/img/:img', async (req, res) => {
+router.get('/:id/image/:img', async (req, res) => {
     const projectImgsSrc = await SrcImages.find({ idProject: req.params.id, src: req.params.img });
     if (projectImgsSrc.length > 0) {
         res.status(200).sendFile(path.join(__dirname, '../../uploads/projects', req.params.img));
@@ -100,6 +100,7 @@ router.get('/:id/srcImgs', async (req, res) => {
  */
 router.post('/:id/image', verifyUserLogged, upload.single('image'), async (req, res) => {
     try {
+        console.log('entra');
         if (!req.file) {
             return res.status(400).send({ message: 'Image is missing' });
         }
