@@ -2,6 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const fs = require('fs');
 const path = require('path');
+const db = require('../database/mySqlConnection');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
