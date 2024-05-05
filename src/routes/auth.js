@@ -108,13 +108,14 @@ router.post('/register', async (req, res, next) => {
             // Finally, if everything is correct, add user to the database
             else {
                 const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
+                const userUrl = username.replace(/\s+/g, '_').toLowerCase();
                 const [rowsInsert, fieldsInsert] = await db.getPromise().query(
                     'INSERT INTO users (username, email, hashPassword, registerDate, url) VALUES (?, ?, ?, ?, ?);',
-                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), username.replace(/\s+/g, '_').toLowerCase()]
+                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl]
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Return token
-                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET) });
+                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), profilePictureSrc: null, userUrl: userUrl });
                 } else {
                     res.status(500).send({ message: 'Something went wrong while adding your account!' });
                 }
@@ -159,18 +160,15 @@ router.post('/login', async (req, res, next) => {
             return res.status(400).send('All fields are required!');
         } else {
             const isValidEmail = username.includes('@') && username.includes('.') && username.indexOf('@') < username.lastIndexOf('.');
-
             const query = isValidEmail
-                ? 'SELECT id, username, hashPassword, role FROM users WHERE email = ?'
-                : 'SELECT id, username, hashPassword, role FROM users WHERE username = ?';
-
+                ? 'SELECT id, username, hashPassword, role, profilePictureSrc, url as userUrl FROM users WHERE email = ?'
+                : 'SELECT id, username, hashPassword, role, profilePictureSrc, url as userUrl FROM users WHERE username = ?';
             const [rows, fields] = await db.getPromise().query(query, [username]);
-
             if (rows.length === 1) {
                 const hashedPassword = rows[0].hashPassword;
                 const passwordMatch = await Bun.password.verify(password, hashedPassword);
                 if (passwordMatch) {
-                    res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET) });
+                    res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET), profilePictureSrc: rows[0].profilePictureSrc, userUrl: rows[0].userUrl });
                 } else {
                     res.status(401).send({ message: 'Authentication failed', errorValues: { username, password } });
                 }
