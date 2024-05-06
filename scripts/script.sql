@@ -74,7 +74,6 @@ INSERT INTO fundflow.users (`role`, username, email, hashPassword, verifiedEmail
 VALUES (true, 'admin', 'marcarcedoalvaro25@gmail.com', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true, 'admin');
 
 INSERT INTO fundflow.users (username, email, hashPassword, `url`) VALUES ('arcedo', 'arcedo.marc@gmail.com', '$2b$10$mEGm4Mxi1ryqKOeN0GVWxu9phXqOaUrLQ7b60XJR4HYfXSCNGs4wG', 'arcedo');
-INSERT INTO fundflow.users (username, email, hashPassword, `url`) VALUES ('enric', 'armengolgarciaenric@gmail.com', '$2b$10$wT99AhzxWKkX3ZT6tlRo6Oiw5pKjV8wM92G7ywLtZ2b/QhhKBpFPS', 'enric');
 
 
 INSERT INTO fundflow.projects (idCategory, idUser, title, description, url, priceGoal, currency, creationDate, deadlineDate, coverImageSrc) 
