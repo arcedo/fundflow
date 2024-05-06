@@ -15,11 +15,11 @@ CREATE TABLE fundflow.users (
     name VARCHAR(50),
     lastName VARCHAR(50),
     biography VARCHAR(250),
-    hashPassword VARCHAR(250) NOT NULL,
+    hashPassword VARCHAR(250),
     verified BOOLEAN DEFAULT FALSE,
     profilePictureSrc VARCHAR(250),
     bannerPictureSrc VARCHAR(250),
-    url VARCHAR(250) NOT NULL,
+    url VARCHAR(250) UNIQUE NOT NULL,
     registerDate VARCHAR(12),
     verifiedEmail BOOLEAN DEFAULT FALSE
 );

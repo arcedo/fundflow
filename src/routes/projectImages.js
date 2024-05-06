@@ -100,7 +100,6 @@ router.get('/:id/srcImgs', async (req, res) => {
  */
 router.post('/:id/image', verifyUserLogged, upload.single('image'), async (req, res) => {
     try {
-        console.log('entra');
         if (!req.file) {
             return res.status(400).send({ message: 'Image is missing' });
         }

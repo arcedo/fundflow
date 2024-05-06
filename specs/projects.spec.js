@@ -82,7 +82,6 @@ describe('projects', () => {
             body: JSON.stringify(testProject)
         });
         const data = await response.json();
-        console.log(data);
         createdProjectId = data.id;
         expect(response.status).toBe(201);
     });
@@ -179,7 +178,6 @@ describe('projects', () => {
         const response = await fetch(endPoint + 'projects/byId/' + createdProjectId);
         const data = await response.json();
         expect(response.status).toBe(200);
-        console.log(data.projectUrl);
         createdProjectTite = data.projectUrl;
         expect(data.id).toBe(createdProjectId);
     });
@@ -187,7 +185,6 @@ describe('projects', () => {
     test('get project', async () => {
         const response = await fetch(endPoint + 'projects/' + createdProjectTite);
         const data = await response.json();
-        console.log(data);
         expect(response.status).toBe(200);
         expect(data.id).toBe(createdProjectId);
     });
