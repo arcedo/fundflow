@@ -2,6 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const jwt = require('jsonwebtoken');
 const db = require('../database/mySqlConnection');
+const path = require('path');
 const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
 const { Resend } = require('resend');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
@@ -110,8 +111,8 @@ router.post('/register', async (req, res, next) => {
                 const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
                 const userUrl = username.replace(/\s+/g, '_').toLowerCase();
                 const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                    'INSERT INTO users (username, email, hashPassword, registerDate, url) VALUES (?, ?, ?, ?, ?);',
-                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl]
+                    'INSERT INTO users (username, email, hashPassword, registerDate, url, profilePictureSrc) VALUES (?, ?, ?, ?, ?, ?);',
+                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(__dirname, `../../uploads/defaultAvatars/${Math.floor(Math.random() * 6)}.svg`)]
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Return token

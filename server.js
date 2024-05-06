@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads/projects', express.static(path.join(__dirname, 'uploads/projects')));
 app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads/profiles')));
+app.use('uploads/defaultAvatars', express.static(path.join(__dirname, 'uploads/defaultAvatars')));
 
 
 // Global error handling middleware
