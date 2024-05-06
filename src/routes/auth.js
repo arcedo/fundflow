@@ -201,8 +201,8 @@ router.post('/login/google', async (req, res, next) => {
             const username = googleUserData.email.split('@')[0];
             const userUrl = username.replace(/\s+/g, '_').toLowerCase();
             const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                'INSERT INTO users (username, email, hashPassword, registerDate, url) VALUES (?, ?, ?, ?, ?);',
-                [username, googleUserData.email, googleUserData.id, new Date().toLocaleDateString('en-GB', dateOptions), userUrl]
+                'INSERT INTO users (username, email, hashPassword, registerDate, url, profilePictureSrc) VALUES (?, ?, ?, ?, ?);',
+                [username, googleUserData.email, googleUserData.id, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6)}.svg`)]
             );
             if (rowsInsert.affectedRows > 0) {
                 res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl });
