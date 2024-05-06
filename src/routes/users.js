@@ -144,7 +144,7 @@ router.get('/byId/:id', async (req, res) => {
 
 router.get('/:url', async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, registerDate FROM users WHERE url = ?', [req.params.url]);
+        const [rows, fields] = await db.getPromise().query('SELECT id, role, username, url, email, name, lastName, biography, verified, registerDate FROM users WHERE url = ?', [req.params.url]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
