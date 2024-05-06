@@ -44,7 +44,7 @@ CREATE TABLE fundflow.projects (
     idUser BIGINT UNSIGNED,
     title VARCHAR(50) NOT NULL,
     description VARCHAR(200) NOT NULL,
-    url VARCHAR(250),
+    url VARCHAR(250) UNIQUE NOT NULL,
     about VARCHAR(250),
     priceGoal BIGINT UNSIGNED DEFAULT NULL,
     currency VARCHAR(10) DEFAULT NULL,

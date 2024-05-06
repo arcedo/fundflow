@@ -182,6 +182,39 @@ router.post('/login', async (req, res, next) => {
     }
 });
 
+router.post('/loginGoogle', async (req, res, next) => {
+    try {
+        const { email, id, username } = req.body;
+        if (!email) {
+            return res.status(400).send('All fields are required!');
+        } else {
+            const [rows, fields] = await db.getPromise().query('SELECT id, username, hashPassword, role, url as userUrl FROM users WHERE email = ?', [email]);
+            if (rows.length === 1) {
+                res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET), userUrl: rows[0].userUrl });
+            } else {
+                if (!username || !id) {
+                    return res.status(400).send('All fields are required!');
+                }
+                const hashedPassword = await Bun.password.hash(id, { algorithm: 'bcrypt' });
+                const userUrl = username.replace(/\s+/g, '_').toLowerCase();
+                const [rowsInsert, fieldsInsert] = await db.getPromise().query(
+                    'INSERT INTO users (username, email, hashPassword, registerDate, url) VALUES (?, ?, ?, ?, ?);',
+                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl]
+                );
+                if (rowsInsert.affectedRows > 0) {
+                    // Return token
+                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl: userUrl });
+                } else {
+                    res.status(500).send({ message: 'Something went wrong while adding your account!' });
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Something went wrong during login!', errorCode: error });
+    }
+});
+
 router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
     const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
     if (rows.length === 1) {
