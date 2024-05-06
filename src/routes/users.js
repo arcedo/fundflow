@@ -129,9 +129,22 @@ const uploadProfileCover = multer({ storage: storageProfileCover });
  *       '500':
  *         description: Internal server error
  */
-router.get('/:id', async (req, res) => {
+router.get('/byId/:id', async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?', [req.params.id]);
+        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, registerDate FROM users WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/:url', async (req, res) => {
+    try {
+        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, registerDate FROM users WHERE url = ?', [req.params.url]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
