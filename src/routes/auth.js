@@ -112,7 +112,7 @@ router.post('/register', async (req, res, next) => {
                 const userUrl = username.replace(/\s+/g, '_').toLowerCase();
                 const [rowsInsert, fieldsInsert] = await db.getPromise().query(
                     'INSERT INTO users (username, email, hashPassword, registerDate, url, profilePictureSrc, bannerPictureSrc) VALUES (?, ?, ?, ?, ?, ?, ?);',
-                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 6) + 1}.svg`)]
+                    [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`)]
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Return token
