@@ -131,7 +131,7 @@ const uploadProfileCover = multer({ storage: storageProfileCover });
  */
 router.get('/byId/:id', async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, registerDate FROM users WHERE id = ?', [req.params.id]);
+        const [rows, fields] = await db.getPromise().query('SELECT role, username, url, email, name, lastName, biography, verified, verifiedEmail, registerDate FROM users WHERE id = ?', [req.params.id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -144,7 +144,7 @@ router.get('/byId/:id', async (req, res) => {
 
 router.get('/:url', async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT id, role, username, url, email, name, lastName, biography, verified, registerDate FROM users WHERE url = ?', [req.params.url]);
+        const [rows, fields] = await db.getPromise().query('SELECT id, role, username, url, email, name, lastName, biography, verified, verifiedEmail, registerDate FROM users WHERE url = ?', [req.params.url]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -157,7 +157,7 @@ router.get('/:url', async (req, res) => {
 
 router.get('/', verifyUserLogged, async (req, res) => {
     try {
-        const [rows, fields] = await db.getPromise().query(`SELECT role, username, url, email, name, lastName, biography, verified, profilePictureSrc, bannerPictureSrc, registerDate FROM users WHERE id = ?`, [req.userId]);
+        const [rows, fields] = await db.getPromise().query(`SELECT role, username, url, email, name, lastName, biography, verified, verifiedEmail, googleAccount, registerDate FROM users WHERE id = ?`, [req.userId]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }

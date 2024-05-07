@@ -19,6 +19,7 @@ CREATE TABLE fundflow.users (
     verified BOOLEAN DEFAULT FALSE,
     profilePictureSrc VARCHAR(250),
     bannerPictureSrc VARCHAR(250),
+    googleAccount BOOLEAN DEFAULT FALSE,
     url VARCHAR(250) UNIQUE NOT NULL,
     registerDate VARCHAR(12),
     verifiedEmail BOOLEAN DEFAULT FALSE

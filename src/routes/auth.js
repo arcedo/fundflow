@@ -161,10 +161,8 @@ router.post('/login', async (req, res, next) => {
             return res.status(400).send('All fields are required!');
         } else {
             const isValidEmail = username.includes('@') && username.includes('.') && username.indexOf('@') < username.lastIndexOf('.');
-            const query = isValidEmail
-                ? 'SELECT id, username, hashPassword, role, url as userUrl FROM users WHERE email = ?'
-                : 'SELECT id, username, hashPassword, role, url as userUrl FROM users WHERE username = ?';
-            const [rows, fields] = await db.getPromise().query(query, [username]);
+            const query = isValidEmail ? 'email' : 'username';
+            const [rows, fields] = await db.getPromise().query(`SELECT id, url as userUrl, hashPassword FROM users WHERE ${query} = ?;`, [username]);
             if (rows.length === 1) {
                 const hashedPassword = rows[0].hashPassword;
                 const passwordMatch = await Bun.password.verify(password, hashedPassword);
@@ -201,8 +199,8 @@ router.post('/login/google', async (req, res, next) => {
             const username = googleUserData.email.split('@')[0];
             const userUrl = username.replace(/\s+/g, '_').toLowerCase();
             const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                'INSERT INTO users (username, email, hashPassword, registerDate, url, profilePictureSrc, bannerPictureSrc) VALUES (?, ?, ?, ?, ?, ?, ?);',
-                [username, googleUserData.email, , new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`)]
+                'INSERT INTO users (username, email, registerDate, url, profilePictureSrc, bannerPictureSrc, googleAccount) VALUES (?, ?, ?, ?, ?, ?, ?);',
+                [username, googleUserData.email, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`), true]
             );
             if (rowsInsert.affectedRows > 0) {
                 res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl });
