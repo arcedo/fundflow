@@ -251,6 +251,36 @@ router.put('/', verifyUserLogged, async (req, res) => {
     }
 });
 
+router.put('/changePassword', verifyUserLogged, async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ message: 'These fields are required: currentPassword, newPassword and confirmPassword', errorValues: { currentPassword, newPassword, confirmPassword } });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match', errorValues: { newPassword, confirmPassword } });
+        }
+        const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const passwordMatch = await Bun.password.verify(currentPassword, rows[0].hashPassword);
+        if (passwordMatch) {
+            const hashedPassword = await Bun.password.hash(newPassword);
+            const [rowsResult, fieldsResult] = await db.getPromise().query('UPDATE users SET hashPassword = ? WHERE id = ?', [hashedPassword, req.userId]);
+            if (rowsResult.affectedRows === 0) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.json({ message: 'Password updated successfully', id: req.userId });
+        } else {
+            return res.status(400).json({ message: 'Current password is incorrect', errorValues: { currentPassword } });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 /**
  * @swagger
  * /users/{id}:
