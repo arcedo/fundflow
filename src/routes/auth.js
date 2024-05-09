@@ -10,6 +10,24 @@ const htmlVerifyMail = require('../../public/htmlVerifyMail');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function sendVerificationEmail(email, userId) {
+    const code = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    if (!code) {
+        return { message: 'Error generating token!', error: err, code: 500 };
+    }
+    const { error } = resend.emails.send({
+        from: "fundflow By Reasonable <noreply@fundflow.arcedo.dev>",
+        to: [email],
+        subject: 'Email Verification',
+        text: 'Please verify your email address by clicking the link below',
+        html: htmlVerifyMail.replace('idUser', `${code}`),
+    });
+    if (error) {
+        return { message: 'Error sending verification email!', error, code: 500 };
+    }
+    return { message: 'Verification email sent!', code: code };
+}
+
 /**
  * @swagger
  * tags:
@@ -75,7 +93,7 @@ router.post('/register', async (req, res, next) => {
         //TODO: maybe is better to verify the values in the front-end
         // Check if all fields are filled
         if (!username || !email || !password || !confirmationPassword) {
-            // All values that are undefined are correct!
+            // All values that are undefined are correct!token
             const errorValues = {
                 username: !username ? username : undefined,
                 email: !email ? email : undefined,
@@ -115,8 +133,10 @@ router.post('/register', async (req, res, next) => {
                     [username, email, hashedPassword, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`)]
                 );
                 if (rowsInsert.affectedRows > 0) {
+                    // Send verification email
+                    const emailResponse = sendVerificationEmail(email, rowsInsert.insertId);
                     // Return token
-                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl: userUrl, verifiedEmail: false });
+                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl: userUrl, verifiedEmail: false, emailResponseCode: emailResponse.code });
                 } else {
                     res.status(500).send({ message: 'Something went wrong while adding your account!' });
                 }
@@ -203,7 +223,10 @@ router.post('/login/google', async (req, res, next) => {
                 [username, googleUserData.email, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`), true]
             );
             if (rowsInsert.affectedRows > 0) {
-                res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl, verifiedEmail: false });
+                // Send verification email
+                const emailResponse = sendVerificationEmail(googleUserData.email, rowsInsert.insertId);
+
+                res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl, verifiedEmail: false, emailResponseCode: emailResponse.code });
             } else {
                 res.status(500).send({ message: 'Something went wrong while adding your account!' });
             }
@@ -218,23 +241,9 @@ router.post('/login/google', async (req, res, next) => {
 router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
     const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
     if (rows.length === 1) {
-        const code = jwt.sign({ id: req.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-        if (!code) {
-            res.status(500).send({ message: 'Error generating token!', error: err });
-        }
-        const { error } = resend.emails.send({
-            from: "fundflow By Reasonable <noreply@fundflow.arcedo.dev>",
-            to: [rows[0].email],
-            subject: 'Email Verification',
-            text: 'Please verify your email address by clicking the link below',
-            html: htmlVerifyMail.replace('idUser', `${code}`),
-        });
-        if (error) {
-            res.status(500).send({ message: 'Error sending verification email!', error });
-        }
-        res.status(200).send({ message: 'Verification email sent!' });
+        res.send(sendVerificationEmail(rows[0].email, req.userId));
     } else {
-        res.status(404).send({ message: 'User not found!' });
+        res.status(404).send({ message: 'User not found!', code: 404 });
     }
 });
 
