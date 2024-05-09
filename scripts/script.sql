@@ -71,11 +71,11 @@ INSERT INTO fundflow.categories (name) VALUES ('Art'), ('Music'), ('Books'), ('G
 
 -- Admin User
 -- If this user is not created some tests in the backend will fail
-INSERT INTO fundflow.users (`role`, username, email, hashPassword, verifiedEmail, `url`)
-VALUES (true, 'admin', 'marcarcedoalvaro25@gmail.com', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true, 'admin');
+INSERT INTO fundflow.users (`role`, username, email, hashPassword, verifiedEmail, `url`, profilePictureSrc)
+VALUES (true, 'admin', 'marcarcedoalvaro25@gmail.com', '$2b$10$uqYGJ4JB/ijaFZWCYePMrOH8ZwMGrUTuIATE09/Lwn7648Sod4u7K', true, 'admin', 'uploads/defaultAvatars/1.svg');
 
-INSERT INTO fundflow.users (username, email, hashPassword, `url`) VALUES ('arcedo', 'arcedo.marc@gmail.com', '$2b$10$mEGm4Mxi1ryqKOeN0GVWxu9phXqOaUrLQ7b60XJR4HYfXSCNGs4wG', 'arcedo');
+INSERT INTO fundflow.users (username, email, hashPassword, `url`, profilePictureSrc) VALUES ('arcedo', 'arcedo.marc@gmail.com', '$2b$10$mEGm4Mxi1ryqKOeN0GVWxu9phXqOaUrLQ7b60XJR4HYfXSCNGs4wG', 'arcedo', 'uploads/profiles/user_2.jpg');
 
 
 INSERT INTO fundflow.projects (idCategory, idUser, title, description, url, priceGoal, currency, creationDate, deadlineDate, coverImageSrc) 
-VALUES (1, 2, 'Project One', 'Description of the project one', 'project-one', 10000, 'EUR', NOW(), '2025-02-01', 'project_1_cover.webp');
+VALUES (1, 2, 'Project One', 'Description of the project one', 'project-one', 10000, 'EUR', NOW(), '2025-02-01', 'uploads/projects/project_1_cover.webp');
