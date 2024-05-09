@@ -78,4 +78,4 @@ INSERT INTO fundflow.users (username, email, hashPassword, `url`) VALUES ('arced
 
 
 INSERT INTO fundflow.projects (idCategory, idUser, title, description, url, priceGoal, currency, creationDate, deadlineDate, coverImageSrc) 
-VALUES (1, 2, 'Project One', 'Description of the project one', 'project-one', 10000, 'EUR', NOW(), '2025-02-01', 'uploads/projects/project_1_cover.webp');
+VALUES (1, 2, 'Project One', 'Description of the project one', 'project-one', 10000, 'EUR', NOW(), '2025-02-01', 'project_1_cover.webp');
