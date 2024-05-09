@@ -25,7 +25,7 @@ function sendVerificationEmail(email, userId) {
     if (error) {
         return { message: 'Error sending verification email!', error, code: 500 };
     }
-    return { message: 'Verification email sent!', code: code };
+    return { message: 'Verification email sent!', code: 200 };
 }
 
 /**

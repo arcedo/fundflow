@@ -169,11 +169,7 @@ style = "border-radius: 4px; box-sizing: border-box; cursor: pointer; display: i
                   The <span style="font-weight: bolder;">Reasonable</span> Team.</p>
               </td >
             </tr >
-
-            < !--END MAIN CONTENT AREA-- >
           </table >
-
-          < !--START FOOTER-- >
   <div class="footer" style="clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0"
       style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;"
