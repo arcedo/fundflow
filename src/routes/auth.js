@@ -11,6 +11,7 @@ const htmlVerifyMail = require('../../public/htmlVerifyMail');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 function sendVerificationEmail(email, userId) {
+    //TODO: is secure to send the id from the user?
     const code = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
     if (!code) {
         return { message: 'Error generating token!', error: err, code: 500 };
@@ -252,15 +253,15 @@ router.get('/verifyEmail/:code', async (req, res, next) => {
     try {
         const decoded = jwt.verify(code, process.env.ACCESS_TOKEN_SECRET);
         if (decoded.exp < Date.now() / 1000) {
-            return res.status(400).send({ message: 'Token expired!' });
+            return res.status(400).send({ message: 'Token expired!', code: 400 });
         }
         const [rows, fields] = await db.getPromise().query("UPDATE users SET verifiedEmail = true WHERE id = ?", [decoded.id]);
         if (rows.affectedRows === 0) {
-            res.status(500).send({ message: 'Error updating user!', error: err });
+            res.status(500).send({ message: 'Error updating user!', code: 500 });
         }
-        res.status(200).send({ message: 'Email verified!' });
+        res.status(200).send({ message: 'Email verified!', code: 200 });
     } catch (err) {
-        res.status(500).send({ message: 'Error verifying email!', error: err });
+        res.status(500).send({ message: 'Error verifying email!', error: err, code: 500 });
     }
 });
 module.exports = router;
