@@ -220,14 +220,11 @@ router.post('/login/google', async (req, res, next) => {
             const username = googleUserData.email.split('@')[0];
             const userUrl = username.replace(/\s+/g, '_').toLowerCase();
             const [rowsInsert, fieldsInsert] = await db.getPromise().query(
-                'INSERT INTO users (username, email, registerDate, url, profilePictureSrc, bannerPictureSrc, googleAccount) VALUES (?, ?, ?, ?, ?, ?, ?);',
-                [username, googleUserData.email, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`), true]
+                'INSERT INTO users (username, email, registerDate, url, profilePictureSrc, bannerPictureSrc, googleAccount, verifiedEmail) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+                [username, googleUserData.email, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`), true, true]
             );
             if (rowsInsert.affectedRows > 0) {
-                // Send verification email
-                const emailResponse = sendVerificationEmail(googleUserData.email, rowsInsert.insertId);
-
-                res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl, verifiedEmail: false, emailResponseCode: emailResponse.code });
+                res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl, verifiedEmail: true });
             } else {
                 res.status(500).send({ message: 'Something went wrong while adding your account!' });
             }
