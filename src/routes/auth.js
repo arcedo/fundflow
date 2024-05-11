@@ -310,7 +310,7 @@ router.put('/recoverPassword/:code', async (req, res, next) => {
             return res.status(400).send({ message: 'Passwords do not match!', code: 400 });
         }
         const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
-        const [rows, fields] = await db.getPromise().query("UPDATE users SET hashPassword = ? WHERE id = ?", [hashedPassword, decoded.id]);
+        const [rows, fields] = await db.getPromise().query("UPDATE users SET hashPassword = ?, googleAccount = false WHERE id = ?", [hashedPassword, decoded.id]);
         if (rows.affectedRows === 0) {
             res.status(500).send({ message: 'Error updating user!', code: 500 });
         }
