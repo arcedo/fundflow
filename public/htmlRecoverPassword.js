@@ -150,7 +150,7 @@ const htmlRecoverPassword = (code, username) => `
                                                         <tr>
                                                             <td style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; border-radius: 4px; text-align: center; background-color: #0867ec;"
                                                                 valign="top" align="center" bgcolor="#0867ec">
-                                                                <a href="${process.env.FRONTEND_HOST}/reset/${code}"
+                                                                <a href="${process.env.FRONTEND_HOST}/recover/${code}"
                                                                     target="_blank"
                                                                     style="border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: bold; margin: 0; padding: 12px 24px; text-decoration: none; text-transform: capitalize; background-image: linear-gradient(to right, #c99df4, #ff8b20); color: #fdfdfd;">
                                                                     Recover Password
