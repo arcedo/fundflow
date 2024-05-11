@@ -7,10 +7,11 @@ const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
 const { Resend } = require('resend');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const htmlVerifyMail = require('../../public/htmlVerifyMail');
+const htmlRecoverPassword = require('../../public/htmlRecoverPassword');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-function sendVerificationEmail(email, userId) {
+function sendVerificationEmail(email, userId, username) {
     //TODO: is secure to send the id from the user?
     const code = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
     if (!code) {
@@ -19,9 +20,9 @@ function sendVerificationEmail(email, userId) {
     const { error } = resend.emails.send({
         from: "fundflow By Reasonable <noreply@fundflow.arcedo.dev>",
         to: [email],
-        subject: 'Email Verification',
+        subject: `Email Verification for ${username} on fundflow - ${new Date().toLocaleDateString('en-GB', dateOptions)}`,
         text: 'Please verify your email address by clicking the link below',
-        html: htmlVerifyMail.replace('idUser', `${code}`),
+        html: htmlVerifyMail(code, username),
     });
     if (error) {
         return { message: 'Error sending verification email!', error, code: 500 };
@@ -135,7 +136,7 @@ router.post('/register', async (req, res, next) => {
                 );
                 if (rowsInsert.affectedRows > 0) {
                     // Send verification email
-                    const emailResponse = sendVerificationEmail(email, rowsInsert.insertId);
+                    const emailResponse = sendVerificationEmail(email, rowsInsert.insertId, username);
                     // Return token
                     res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl: userUrl, verifiedEmail: false, emailResponseCode: emailResponse.code });
                 } else {
@@ -237,9 +238,9 @@ router.post('/login/google', async (req, res, next) => {
 });
 
 router.post('/verifyEmail', verifyUserLogged, async (req, res, next) => {
-    const [rows, fields] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
+    const [rows, fields] = await db.getPromise().query('SELECT email, username FROM users WHERE id = ?', [req.userId]);
     if (rows.length === 1) {
-        res.send(sendVerificationEmail(rows[0].email, req.userId));
+        res.send(sendVerificationEmail(rows[0].email, req.userId, rows[0].username));
     } else {
         res.status(404).send({ message: 'User not found!', code: 404 });
     }
@@ -259,6 +260,60 @@ router.get('/verifyEmail/:code', async (req, res, next) => {
         res.status(200).send({ message: 'Email verified!', code: 200 });
     } catch (err) {
         res.status(500).send({ message: 'Error verifying email!', error: err, code: 500 });
+    }
+});
+
+//TODO add password recovery
+router.post('/recoverPassword', async (req, res, next) => {
+    const { email } = req.body;
+    try {
+        const [rows, fields] = await db.getPromise().query('SELECT id, email FROM users WHERE email = ?', [email]);
+        if (rows.length === 1) {
+            const code = jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            if (!code) {
+                return res.status(500).send({ message: 'Error generating token!', error: err, code: 500 });
+            }
+            const { error } = resend.emails.send({
+                from: "fundflow By Reasonable <noreply@fundflow.arcedo.dev>",
+                to: [email],
+                subject: 'Email Verification',
+                text: 'Please verify your email address by clicking the link below',
+                html: htmlRecoverPassword(code, username),
+            });
+            if (error) {
+                return res.status(500).send({ message: 'Error sending verification email!', error, code: 500 });
+            }
+            res.status(200).send({ message: 'Email sent!', code: 200 });
+        }
+        res.status(404).send({ message: 'User not found!', code: 404 });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Something went wrong during password recovery!', errorCode: error });
+    }
+});
+
+router.put('/recoverPassword/:code', async (req, res, next) => {
+    const { code } = req.params;
+    const { password, confirmationPassword } = req.body;
+    try {
+        const decoded = jwt.verify(code, process.env.ACCESS_TOKEN_SECRET);
+        if (decoded.exp < Date.now() / 1000) {
+            return res.status(400).send({ message: 'Token expired!', code: 400 });
+        }
+        if (!password || !confirmationPassword) {
+            return res.status(400).send({ message: 'All fields are required!', code: 400 });
+        }
+        if (password !== confirmationPassword) {
+            return res.status(400).send({ message: 'Passwords do not match!', code: 400 });
+        }
+        const hashedPassword = await Bun.password.hash(password, { algorithm: 'bcrypt' });
+        const [rows, fields] = await db.getPromise().query("UPDATE users SET hashPassword = ? WHERE id = ?", [hashedPassword, decoded.id]);
+        if (rows.affectedRows === 0) {
+            res.status(500).send({ message: 'Error updating user!', code: 500 });
+        }
+        res.status(200).send({ message: 'Password updated!', code: 200 });
+    } catch (err) {
+        res.status(500).send({ message: 'Error recovering password!!', error: err, code: 500 });
     }
 });
 module.exports = router;

@@ -177,3 +177,6 @@ dist
 
 # Docker compose
 docker-compose.yaml
+
+# sh file
+resetDatabase.sh

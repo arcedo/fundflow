@@ -1,4 +1,4 @@
-const htmlVerifyMail = `<!doctype html>
+const htmlVerifyMail = (code, username) => `<!doctype html>
 <html lang="en">
 
 <head>
@@ -126,7 +126,7 @@ const htmlVerifyMail = `<!doctype html>
                 valign="top">
                 <h2
                   style="font-family: Helvetica, sans-serif; font-size: 20px; font-weight: bold; margin: 0; margin-bottom: 16px;">
-                  One last step</h2>
+                  One last step, ${username}</h2>
                 <p
                   style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
                   Please verify your email address by clicking the link below:
@@ -145,53 +145,61 @@ const htmlVerifyMail = `<!doctype html>
                             <tr>
                               <td
                                 style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; border-radius: 4px; text-align: center; background-color: #0867ec;"
-                                valign="top" align="center" bgcolor="#0867ec"> <a href="${process.env.FRONTEND_HOST}/verifyEmail/idUser"
-target = "_blank"
-style = "border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: bold; margin: 0; padding: 12px 24px; text-decoration: none; text-transform: capitalize; background-image: linear-gradient(to right, #c99df4, #ff8b20); color: #fdfdfd;" >
-  Verify</a > </td >
-                            </tr >
-                          </tbody >
-                        </table >
-                      </td >
-                    </tr >
-                  </tbody >
-                </table >
+                                valign="top" align="center" bgcolor="#0867ec">
+                                <a href="${process.env.FRONTEND_HOST}/verifyEmail/${code}" target="_blank"
+                                  style="border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: bold; margin: 0; padding: 12px 24px; text-decoration: none; text-transform: capitalize; background-image: linear-gradient(to right, #c99df4, #ff8b20); color: #fdfdfd;">
+                                  Verify
+                                </a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="font-weight: 600;">This verification is
+                  only valid for the next
+                  hour.</p>
                 <p
-                  style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+                  style="font-family: Helvetica, sans-serif; font-size: 15px; font-weight: normal; margin: 0; margin-bottom: 16px;">
                   You are receiving this email because you signed up for fundflow. If you believe this is a mistake,
                   please
                   contact
-                  us at <a href="mailto:info@fundflow.arcedo.dev">info@fundflow.arcedo.dev</a>.</p>
+                  us at <a href="mailto:info@fundflow.arcedo.dev"
+                    style="color: #c99df4; font-weight: 600;">info@fundflow.arcedo.dev</a>.
+                </p>
                 <p
                   style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 5px;">
                   Thanks,</p>
                 <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0;">
                   The <span style="font-weight: bolder;">Reasonable</span> Team.</p>
-              </td >
-            </tr >
-          </table >
-  <div class="footer" style="clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;">
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
-      style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;"
-      width="100%">
-      <tr>
-        <td class="content-block"
-          style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;"
-          valign="top" align="center">
-          <span class="apple-link" style="color: #9a9ea6; font-size: 16px; text-align: center;">
-            Do not reply to this email, this is an auto-generated email.
-          </span>
-        </td>
-      </tr>
-    </table>
-  </div>
-        </div >
-      </td >
-  <td style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top;" valign="top">&nbsp;</td>
-    </tr >
-  </table >
-</body >
+              </td>
+            </tr>
+          </table>
+          <div class="footer"
+            style="clear: both; padding-top: 12px; padding-bottom: 12px; text-align: center; width: 100%;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+              style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;"
+              width="100%">
+              <tr>
+                <td class="content-block"
+                  style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;"
+                  valign="top" align="center">
+                  <span class="apple-link" style="color: #9a9ea6; font-size: 14px; text-align: center;">
+                    Do not reply to this email, this is an auto-generated email.
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </td>
+      <td style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top;" valign="top">&nbsp;</td>
+    </tr>
+  </table>
+</body>
 
-</html > `;
+</html> `;
 
 module.exports = htmlVerifyMail;
