@@ -209,4 +209,4 @@ const htmlRecoverPassword = (code, username) => `
 </html>
 `;
 
-export default htmlRecoverPassword;
+module.exports = htmlRecoverPassword;

@@ -266,8 +266,11 @@ router.get('/verifyEmail/:code', async (req, res, next) => {
 //TODO add password recovery
 router.post('/recoverPassword', async (req, res, next) => {
     const { email } = req.body;
+    if (!email) {
+        return res.status(400).send({ message: 'Email is required!', code: 400 });
+    }
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT id, email, username FROM users WHERE email = ?', [email]);
+        const [rows, fields] = await db.getPromise().query('SELECT id, username FROM users WHERE email = ?', [email]);
         if (rows.length === 1) {
             const code = jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             if (!code) {
@@ -276,7 +279,7 @@ router.post('/recoverPassword', async (req, res, next) => {
             const { error } = resend.emails.send({
                 from: "fundflow By Reasonable <noreply@fundflow.arcedo.dev>",
                 to: [email],
-                subject: 'Email Verification',
+                subject: `Recover Password for ${rows[0].username} - ${new Date().toLocaleDateString('en-GB', dateOptions)}`,
                 text: 'Please verify your email address by clicking the link below',
                 html: htmlRecoverPassword(code, rows[0].username),
             });
