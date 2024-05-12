@@ -213,8 +213,8 @@ router.get('/', verifyUserLogged, async (req, res) => {
 router.put('/', verifyUserLogged, async (req, res) => {
     try {
         const { username, email, name, lastName, biography, currentPassword } = req.body;
-        if (!username || !email || !name || !lastName || !biography) {
-            return res.status(400).json({ message: 'These fields are required: username, email, name, last name and biography' });
+        if (!username || !email) {
+            return res.status(400).json({ message: 'These fields are required: username and email' });
         }
         const [rows, fields] = await db.getPromise().query('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?', [username, email, req.userId]);
         if (rows.length > 0) {
