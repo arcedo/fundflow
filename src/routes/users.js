@@ -340,15 +340,15 @@ router.delete('/:id', verifyAdminRole, async (req, res) => {
 //Delete your own user
 router.delete('/', verifyUserLogged, async (req, res) => {
     const { password } = req.body;
-    if (!password) {
-        return res.status(400).json({ message: 'Password is required' });
-    }
     try {
         const [rows, fields] = await db.getPromise().query('SELECT hashPassword, googleAccount FROM users WHERE id = ?', [req.userId]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
         if (rows[0].googleAccount !== 1) {
+            if (!password) {
+                return res.status(400).json({ message: 'Password is required' });
+            }
             const passwordMatch = await Bun.password.verify(password, rows[0].hashPassword);
             if (!passwordMatch) {
                 return res.status(400).json({ message: 'Password is incorrect' });
