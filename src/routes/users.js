@@ -344,13 +344,15 @@ router.delete('/', verifyUserLogged, async (req, res) => {
         return res.status(400).json({ message: 'Password is required' });
     }
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
+        const [rows, fields] = await db.getPromise().query('SELECT hashPassword, googleAccount FROM users WHERE id = ?', [req.userId]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const passwordMatch = await Bun.password.verify(password, rows[0].hashPassword);
-        if (!passwordMatch) {
-            return res.status(400).json({ message: 'Password is incorrect' });
+        if (rows[0].googleAccount !== 1) {
+            const passwordMatch = await Bun.password.verify(password, rows[0].hashPassword);
+            if (!passwordMatch) {
+                return res.status(400).json({ message: 'Password is incorrect' });
+            }
         }
         const [deleteRows, deleteFields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.userId]);
         if (deleteRows.affectedRows === 0) {
