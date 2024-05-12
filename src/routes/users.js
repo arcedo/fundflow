@@ -216,8 +216,8 @@ router.put('/', verifyUserLogged, async (req, res) => {
         if (!username || !email || !name || !lastName || !biography) {
             return res.status(400).json({ message: 'These fields are required: username, email, name, last name and biography' });
         }
-        const [verifyNoUserWithSameData, fieldsVerifyNoUserWithSameData] = await db.getPromise().query('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?', [username, email, req.userId]);
-        if (verifyNoUserWithSameData.length > 0) {
+        const [rows, fields] = await db.getPromise().query('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?', [username, email, req.userId]);
+        if (rows.length > 0) {
             return res.status(400).json({ message: 'Username or email already in use', errorValues: { username, email } });
         }
         let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, url = ?';
