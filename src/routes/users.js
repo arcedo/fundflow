@@ -212,7 +212,7 @@ router.get('/', verifyUserLogged, async (req, res) => {
  */
 router.put('/', verifyUserLogged, async (req, res) => {
     try {
-        const { username, email, name, lastName, biography, currentPassword, newPassword, confirmPassword } = req.body;
+        const { username, email, name, lastName, biography, currentPassword } = req.body;
         if (!username || !email || !name || !lastName || !biography) {
             return res.status(400).json({ message: 'These fields are required: username, email, name, last name and biography' });
         }
@@ -222,21 +222,9 @@ router.put('/', verifyUserLogged, async (req, res) => {
         }
         let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, url = ?';
         const values = [username, email, name, lastName, biography, url = username.replace(/\s+/g, '_').toLowerCase()];
-        if (currentPassword && newPassword && confirmPassword && newPassword === confirmPassword) {
-            const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
-            if (rows.length === 0) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            const passwordMatch = await Bun.password.verify(currentPassword, rows[0].hashPassword);
-            if (passwordMatch) {
-                const hashedPassword = await Bun.password.hash(newPassword);
-                sqlQuery += ', hashPassword = ?';
-                values.push(hashedPassword);
-            } else {
-                return res.status(400).json({ message: 'Current password is incorrect', errorValues: { currentPassword } });
-            }
-        } else {
-            return res.status(400).json({ message: 'Passwords do not match', errorValues: { newPassword, confirmPassword } });
+        const passwordMatch = await Bun.password.verify(currentPassword, rows[0].hashPassword);
+        if (!passwordMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect', errorValues: { currentPassword } });
         }
         sqlQuery += ' WHERE id = ?';
         const [rowsResult, fieldsResult] = await db.getPromise().query(sqlQuery, [...values, req.userId]);
