@@ -220,9 +220,10 @@ router.put('/', verifyUserLogged, async (req, res) => {
         if (rows.length > 0) {
             return res.status(400).json({ message: 'Username or email already in use', errorValues: { username, email } });
         }
+        const [rowsLoggedUser, fieldsLoggedUser] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
         let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, url = ?';
         const values = [username, email, name, lastName, biography, url = username.replace(/\s+/g, '_').toLowerCase()];
-        const passwordMatch = await Bun.password.verify(currentPassword, rows[0].hashPassword);
+        const passwordMatch = await Bun.password.verify(currentPassword, rowsLoggedUser[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Current password is incorrect', errorValues: { currentPassword } });
         }
