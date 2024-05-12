@@ -339,9 +339,21 @@ router.delete('/:id', verifyAdminRole, async (req, res) => {
 
 //Delete your own user
 router.delete('/', verifyUserLogged, async (req, res) => {
+    const { password } = req.body;
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
     try {
-        const [rows, fields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.userId]);
-        if (rows.affectedRows === 0) {
+        const [rows, fields] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const passwordMatch = await Bun.password.verify(password, rows[0].hashPassword);
+        if (!passwordMatch) {
+            return res.status(400).json({ message: 'Password is incorrect' });
+        }
+        const [deleteRows, deleteFields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.userId]);
+        if (deleteRows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
         res.status(200).json({ message: 'User deleted successfully', id: req.userId });
