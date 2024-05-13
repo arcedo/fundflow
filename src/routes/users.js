@@ -369,11 +369,9 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        if (!currentUserRows[0].profilePictureSrc.includes('profiles/user_')) {
-            const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-            if (rows.affectedRows === 0) {
-                return res.status(404).json({ message: 'User not found' });
-            }
+        const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+        if (rows.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
         }
         res.status(200).json({ message: 'Profile picture updated successfully', id: req.userId });
     } catch (err) {
@@ -396,11 +394,9 @@ router.put('/profileCover', verifyUserLogged, uploadProfileCover.single('profile
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        if (!currentUserRows[0].bannerPictureSrc.includes('profiles/user_')) {
-            const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-            if (rows.affectedRows === 0) {
-                return res.status(404).json({ message: 'User not found' });
-            }
+        const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+        if (rows.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
         }
         res.status(200).json({ message: 'Profile cover updated successfully', id: req.userId });
     } catch (err) {
