@@ -361,15 +361,15 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         return res.status(400).json({ message: 'Password is required' });
     }
     try {
-        const verifyExistingProfilePicture = await db.getPromise().query('SELECT profilePictureSrc, hashedPassword FROM users WHERE id = ?', [req.userId]);
+        const verifyExistingProfilePicture = await db.getPromise().query('SELECT profilePictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
         if (verifyExistingProfilePicture.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const passwordMatch = await Bun.password.verify(password, verifyExistingProfilePicture[0].hashedPassword);
+        const passwordMatch = await Bun.password.verify(password, verifyExistingProfilePicture[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        if (verifyExistingProfilePicture[0].profilePictureSrc) {
+        if (verifyExistingProfilePicture[0].profilePictureSrc && !verifyExistingProfilePicture[0].profilePictureSrc.includes('uploads/defaultAvatars/')) {
             fs.unlinkSync(verifyExistingProfilePicture[0].profilePictureSrc);
         }
         const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
@@ -389,15 +389,15 @@ router.put('/profileCover', verifyUserLogged, uploadProfileCover.single('profile
         return res.status(400).json({ message: 'Password is required' });
     }
     try {
-        const verifyExistingProfileCover = await db.getPromise().query('SELECT bannerPictureSrc, hashedPassword FROM users WHERE id = ?', [req.userId]);
+        const verifyExistingProfileCover = await db.getPromise().query('SELECT bannerPictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
         if (verifyExistingProfileCover.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const passwordMatch = await Bun.password.verify(password, verifyExistingProfileCover[0].hashedPassword);
+        const passwordMatch = await Bun.password.verify(password, verifyExistingProfileCover[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        if (verifyExistingProfileCover[0].bannerPictureSrc) {
+        if (verifyExistingProfileCover[0].bannerPictureSrc && !verifyExistingProfileCover[0].bannerPictureSrc.includes('uploads/defaultBanners/')) {
             fs.unlinkSync(verifyExistingProfileCover[0].bannerPictureSrc);
         }
         const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
