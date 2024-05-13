@@ -372,8 +372,12 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         if (verifyExistingProfilePicture[0].profilePictureSrc && !verifyExistingProfilePicture[0].profilePictureSrc.includes('uploads/defaultAvatars/')) {
             fs.unlinkSync(verifyExistingProfilePicture[0].profilePictureSrc);
         }
-        console.log(req.file.path);
+        const [selectRows, selectFields] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.userId]);
+        console.log(selectRows);
         const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+        const [selectRows2, selectFields2] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.userId]);
+        console.log(selectRows2);
+        console.log(rows);
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
