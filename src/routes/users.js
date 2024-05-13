@@ -361,7 +361,7 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         return res.status(400).json({ message: 'Password is required' });
     }
     try {
-        const verifyExistingProfilePicture = await db.getPromise().query('SELECT profilePictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
+        const [verifyExistingProfilePicture, fieldsVerifyProfilePicture] = await db.getPromise().query('SELECT profilePictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
         if (verifyExistingProfilePicture.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
