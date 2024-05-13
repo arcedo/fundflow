@@ -361,17 +361,19 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         return res.status(400).json({ message: 'Password is required' });
     }
     try {
-        const [verifyExistingProfilePicture, fieldsVerifyProfilePicture] = await db.getPromise().query('SELECT profilePictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
-        if (verifyExistingProfilePicture.length === 0) {
+        const [currentUserRows, currentUserFields] = await db.getPromise().query('SELECT profilePictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
+        if (currentUserRows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const passwordMatch = await Bun.password.verify(password, verifyExistingProfilePicture[0].hashPassword);
+        const passwordMatch = await Bun.password.verify(password, currentUserRows[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-        if (rows.affectedRows === 0) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!currentUserRows[0].profilePictureSrc.includes('profiles/user_')) {
+            const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+            if (rows.affectedRows === 0) {
+                return res.status(404).json({ message: 'User not found' });
+            }
         }
         res.status(200).json({ message: 'Profile picture updated successfully', id: req.userId });
     } catch (err) {
@@ -386,17 +388,19 @@ router.put('/profileCover', verifyUserLogged, uploadProfileCover.single('profile
         return res.status(400).json({ message: 'Password is required' });
     }
     try {
-        const verifyExistingProfileCover = await db.getPromise().query('SELECT bannerPictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
-        if (verifyExistingProfileCover.length === 0) {
+        const [currentUserRows, currentUserFields] = await db.getPromise().query('SELECT bannerPictureSrc, hashPassword FROM users WHERE id = ?', [req.userId]);
+        if (currentUserRows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const passwordMatch = await Bun.password.verify(password, verifyExistingProfileCover[0].hashPassword);
+        const passwordMatch = await Bun.password.verify(password, currentUserRows[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-        if (rows.affectedRows === 0) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!currentUserRows[0].bannerPictureSrc.includes('profiles/user_')) {
+            const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+            if (rows.affectedRows === 0) {
+                return res.status(404).json({ message: 'User not found' });
+            }
         }
         res.status(200).json({ message: 'Profile cover updated successfully', id: req.userId });
     } catch (err) {
