@@ -13,7 +13,7 @@ const storageProfilePicture = multer.diskStorage({
     filename: function (req, file, cb) {
         const fileExtension = file.originalname.split('.').pop();
         const timestamp = Date.now();
-        const newFileName = `user_${req.params.id}.${fileExtension}`;
+        const newFileName = `user_${req.userId}.${fileExtension}`;
         cb(null, newFileName);
     }
 });
@@ -24,7 +24,7 @@ const storageProfileCover = multer.diskStorage({
     filename: function (req, file, cb) {
         const fileExtension = file.originalname.split('.').pop();
         const timestamp = Date.now();
-        const newFileName = `user_${req.params.id}_cover.${fileExtension}`;
+        const newFileName = `user_${req.userId}_cover.${fileExtension}`;
         cb(null, newFileName);
     }
 });
