@@ -369,15 +369,7 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
         }
-        if (verifyExistingProfilePicture[0].profilePictureSrc && !verifyExistingProfilePicture[0].profilePictureSrc.includes('uploads/defaultAvatars/')) {
-            fs.unlinkSync(verifyExistingProfilePicture[0].profilePictureSrc);
-        }
-        const [selectRows, selectFields] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.userId]);
-        console.log(selectRows);
         const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-        const [selectRows2, selectFields2] = await db.getPromise().query('SELECT profilePictureSrc FROM users WHERE id = ?', [req.userId]);
-        console.log(selectRows2);
-        console.log(rows);
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -401,9 +393,6 @@ router.put('/profileCover', verifyUserLogged, uploadProfileCover.single('profile
         const passwordMatch = await Bun.password.verify(password, verifyExistingProfileCover[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
-        }
-        if (verifyExistingProfileCover[0].bannerPictureSrc && !verifyExistingProfileCover[0].bannerPictureSrc.includes('uploads/defaultBanners/')) {
-            fs.unlinkSync(verifyExistingProfileCover[0].bannerPictureSrc);
         }
         const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
         if (rows.affectedRows === 0) {
