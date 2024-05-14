@@ -44,7 +44,7 @@ CREATE TABLE fundflow.projects (
     idCategory BIGINT UNSIGNED NOT NULL,
     idUser BIGINT UNSIGNED,
     title VARCHAR(50) NOT NULL,
-    description VARCHAR(200) NOT NULL,
+    description VARCHAR(250) NOT NULL,
     url VARCHAR(250) UNIQUE NOT NULL,
     about VARCHAR(250),
     priceGoal BIGINT UNSIGNED DEFAULT NULL,
@@ -78,4 +78,4 @@ INSERT INTO fundflow.users (username, email, hashPassword, `url`, profilePicture
 
 
 INSERT INTO fundflow.projects (idCategory, idUser, title, description, url, priceGoal, currency, creationDate, deadlineDate, coverImageSrc) 
-VALUES (1, 2, 'Project One', 'Description of the project one', 'project-one', 10000, 'EUR', NOW(), '2025-02-01', 'uploads/projects/project_1_cover.webp');
+VALUES (1, 2, 'Project One', 'Description of the project one', 'project-one', 10000, 'EUR', '2024-03-03', '2025-02-01', 'uploads/projects/project_1_cover.webp');
