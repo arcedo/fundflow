@@ -16,7 +16,10 @@ const storage = multer.diskStorage({
         cb(null, newFileName);
     }
 });
-const uploadProjectCover = multer({ storage });
+const uploadProjectCover = multer({
+    storage: storage,
+    limits: { fileSize: 25 * 1024 * 1024 } // 10MB file size limit
+});
 
 const projectBlogs = require('./projectBlogs');
 const projectImages = require('./projectImages');
