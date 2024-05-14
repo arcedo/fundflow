@@ -751,27 +751,19 @@ router.put('/:id/cover', verifyUserLogged, upload.single('cover'), async (req, r
     try {
         // Validate required fields and their types/format if necessary
         if (!req.file) {
-            return res.status(400).send({ message: 'Cover is required!' });
-        }
-        const checkAlreadyCover = await executeQuery('SELECT coverImageSrc FROM projects WHERE id = ?', [req.params.id]);
-        if (checkAlreadyCover[0].coverImageSrc) {
-            fs.unlink(checkAlreadyCover[0].coverImageSrc, (err) => {
-                if (err) {
-                    res.send({ message: 'Unable to delete the previous cover image' });
-                }
-            });
+            return res.status(400).send({ message: 'Cover is required!', code: 400 });
         }
         // Execute the database query
         const rows = await executeQuery('UPDATE projects SET coverImageSrc = ? WHERE id = ?', [req.file.path, req.params.id]);
         // Check if the project was successfully updated
         if (rows.affectedRows > 0) {
-            res.status(200).send({ message: 'Project cover updated successfully' });
+            res.status(200).send({ message: 'Project cover updated successfully', code: 200 });
         } else {
-            res.status(400).send({ message: 'Unable to update project cover' });
+            res.status(400).send({ message: 'Unable to update project cover', code: 400 });
         }
     } catch (error) {
         console.error('Error in PUT /:id/cover route:', error);
-        res.status(500).send({ message: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error', code: 500 });
     }
 });
 
