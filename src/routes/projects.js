@@ -669,7 +669,7 @@ router.post('/', verifyUserLogged, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id', verifyUserLogged, upload.single('cover'), async (req, res) => {
+router.put('/:id', verifyUserLogged, async (req, res) => {
     try {
         const { idCategory, title, description, deadlineDate, goal, currency, typeGoal } = req.body;
         // Validate required fields and their types/format if necessary
