@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
         cb(null, newFileName);
     }
 });
-const upload = multer({ storage });
+const uploadProjectCover = multer({ storage });
 
 const projectBlogs = require('./projectBlogs');
 const projectImages = require('./projectImages');
@@ -747,7 +747,7 @@ router.put('/:id', verifyUserLogged, upload.single('cover'), async (req, res) =>
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id/cover', verifyUserLogged, upload.single('cover'), async (req, res) => {
+router.put('/:id/cover', verifyUserLogged, uploadProjectCover.single('cover'), async (req, res) => {
     try {
         // Validate required fields and their types/format if necessary
         if (!req.file) {
