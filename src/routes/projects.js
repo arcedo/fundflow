@@ -610,18 +610,18 @@ router.post('/', verifyUserLogged, async (req, res) => {
             return res.status(400).json({ message: 'Currency is required!' });
         } else if (typeGoal === 'price') {
             result = await executeQuery(
-                'INSERT INTO projects (idCategory, idUser, title, url, description, priceGoal, currency, creationDate, deadlineDate) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)',
-                [idCategory, req.userId, title, url, description, goal, currency, parsedDeadlineDate]
+                'INSERT INTO projects (idCategory, idUser, title, url, description, priceGoal, currency, creationDate, deadlineDate, coverImageSrc) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
+                [idCategory, req.userId, title, url, description, goal, currency, parsedDeadlineDate, path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`)]
             );
         } else {
             result = await executeQuery(
-                'INSERT INTO projects (idCategory, idUser, title, url, description, collGoal, creationDate, deadlineDate) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)',
-                [idCategory, req.userId, title, url, description, goal, parsedDeadlineDate]
+                'INSERT INTO projects (idCategory, idUser, title, url, description, collGoal, creationDate, deadlineDate, coverImageSrc) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
+                [idCategory, req.userId, title, url, description, goal, parsedDeadlineDate, path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`)]
             );
         }
 
         if (result && result.affectedRows > 0) {
-            res.status(201).json({ message: 'Project created successfully', id: result.insertId });
+            res.status(201).json({ message: 'Project created successfully', id: result.insertId, url: url });
         } else {
             res.status(400).json({ message: 'Unable to create project' });
         }
