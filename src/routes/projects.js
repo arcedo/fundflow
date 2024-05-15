@@ -611,9 +611,9 @@ router.post('/', verifyUserLogged, async (req, res) => {
         if (checkUrlRows.length > 0) {
             url = `${url}_${checkUrlRows.length}`;
         }
-        if (typeGoal === 'price' && !currency) {
+        if (typeGoal === 'funds' && !currency) {
             return res.status(400).json({ message: 'Currency is required!' });
-        } else if (typeGoal === 'price') {
+        } else if (typeGoal === 'funds') {
             result = await executeQuery(
                 'INSERT INTO projects (idCategory, idUser, title, url, description, priceGoal, currency, creationDate, deadlineDate, coverImageSrc) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
                 [idCategory, req.userId, title, url, description, goal, currency, parsedDeadlineDate, path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`)]
