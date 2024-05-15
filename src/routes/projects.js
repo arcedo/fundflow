@@ -538,7 +538,7 @@ router.get('/byId/:id', async (req, res) => {
 router.get('/:titleUrl', async (req, res) => {
     try {
         const rows = await executeQuery(
-            `SELECT p.id, c.name, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+            `SELECT p.id, c.name as categoryName, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal, p.currency, p.description, p.creationDate, p.deadlineDate
             FROM projects p
             JOIN users u ON p.idUser = u.id
             LEFT JOIN categories c ON p.idCategory = c.id
