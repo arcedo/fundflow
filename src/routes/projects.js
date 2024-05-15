@@ -460,11 +460,14 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
  *       '500':
  *         description: Internal server error.
  */
+// Example request: /projects/random?startIndex=0&limit=10&lastId=0
 router.get('/random', validateQueryParams, async (req, res) => {
+    const { lastId } = req.query;
     try {
         const rows = await executeQuery(
             `SELECT p.id, c.name as category, p.description, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-            FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
+            FROM projects p JOIN users u ON(p.idUser = u.id) JOIN categories c ON(p.idCategory = c.id) 
+            ${lastId ? `WHERE p.id != ${lastId}` : ''}
             ORDER BY RAND() 
             LIMIT ?, ?`,
             [req.startIndex, req.limit]
