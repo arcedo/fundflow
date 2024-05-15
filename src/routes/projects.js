@@ -197,8 +197,8 @@ router.get('/', validateQueryParams, async (req, res) => {
     try {
         const rows = await executeQuery(
             `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-            FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
-            ORDER BY p.creationDate 
+            FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id) 
+            ORDER BY p.creationDate DESC 
             LIMIT ?, ?`,
             [req.startIndex, req.limit]
         );
