@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 });
 const uploadProjectCover = multer({
     storage: storage,
-    limits: { fileSize: 25 * 1024 * 1024 } // 10MB file size limit
+    limits: { fileSize: 45 * 1024 * 1024 } // MB file size limit
 });
 
 const projectBlogs = require('./projectBlogs');
@@ -882,9 +882,9 @@ router.delete('/:id', verifyUserLogged, verifyAdminRole, async (req, res) => {
         if (rows.affectedRows > 0) {
             await StatsProjects.deleteMany({ idProject: req.params.id });
             await SrcImages.deleteMany({ idProject: req.params.id });
-            res.status(200).send({ message: 'Project deleted successfully' });
+            res.status(200).send({ message: 'Project deleted successfully', code: 200 });
         } else {
-            res.status(404).send({ message: 'No project found' });
+            res.status(404).send({ message: 'No project found', code: 404 });
         }
     } catch (error) {
         console.error('Error in DELETE /:id route:', error);
