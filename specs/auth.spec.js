@@ -124,9 +124,11 @@ describe('auth created delete user', () => {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': createdUserData.token
-            }
+            },
+            body: JSON.stringify({
+                password: testUser.password
+            }),
         });
-        const data = await response.json();
         expect(response.status).toBe(200);
     });
 });

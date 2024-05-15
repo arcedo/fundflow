@@ -3,6 +3,7 @@ const router = Router();
 const db = require('../database/mySqlConnection');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
+const UserFollows = require('../models/userFollows');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -148,6 +149,8 @@ router.get('/:url', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
+        rows.followers = await UserFollows.countDocuments({ idFollows: rows[0].id });
+        rows.following = await UserFollows.countDocuments({ userId: rows[0].id });
         res.json(rows);
     } catch (err) {
         console.error(err);

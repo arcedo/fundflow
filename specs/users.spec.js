@@ -51,7 +51,13 @@ describe('users', () => {
     test('delete user with token', async () => {
         const response = await fetch(endPoint + 'users/', {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application', 'Authorization': userData.token }
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': userData.token
+            },
+            body: JSON.stringify({
+                password: testUser.password
+            }),
         });
         expect(response.status).toBe(200);
     });

@@ -25,15 +25,6 @@ CREATE TABLE fundflow.users (
     verifiedEmail BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE fundflow.followsUsers (
-	id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    idFollowingUser BIGINT UNSIGNED,
-    idFollowedUser BIGINT UNSIGNED,
-    -- PRIMARY KEY (idFollowingUser, idFollowedUser),
-    FOREIGN KEY (idFollowingUser) REFERENCES fundflow.users(id) ON DELETE SET NULL,
-    FOREIGN KEY (idFollowedUser) REFERENCES fundflow.users(id) ON DELETE SET NULL
-);
-
 CREATE TABLE fundflow.categories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) UNIQUE

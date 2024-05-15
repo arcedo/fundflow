@@ -19,17 +19,12 @@ router.use((req, res, next) => {
     next();
 });
 
-const apiDocs = require('./apiDocs');
-const auth = require('./auth');
-const projects = require('./projects');
-const categories = require('./categories');
-const users = require('./users');
-
-router.use('/api-docs', apiDocs);
-router.use('/auth', auth);
-router.use('/projects', projects);
-router.use('/categories', categories);
-router.use('/users', users);
+router.use('/api-docs', require('./apiDocs'));
+router.use('/auth', require('./auth'));
+router.use('/projects', require('./projects'));
+router.use('/categories', require('./categories'));
+router.use('/users', require('./users'));
+router.use('/follows', require('./follows'));
 router.get('/', (req, res) => {
     res.status(200).send({ message: 'Welcome to FundFlow API' });
 });

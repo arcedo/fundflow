@@ -290,6 +290,7 @@ describe('projects', () => {
         await fetch(`${endPoint}users/`, {
             method: 'DELETE',
             headers: { 'Authorization': userData.token },
+            body: JSON.stringify({ password: testUser.password }),
         });
     });
 });
