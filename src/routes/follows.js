@@ -5,8 +5,9 @@ const verifyUserLogged = require('../controllers/verifyUserLogged');
 
 const UserFollows = require('../models/userFollows');
 
+// followsUserUrl is the user that follows another user
+// userUrl is the user that is being followed
 router.post('/follow', verifyUserLogged, async (req, res) => {
-
     try {
         const follow = new UserFollows({ userUrl: req.body.userUrl, followsUserUrl: req.body.followUserUrl });
         await follow.save();
@@ -31,24 +32,28 @@ router.delete('/unfollow', verifyUserLogged, async (req, res) => {
     }
 });
 
-router.get('/followers', verifyUserLogged, async (req, res) => {
+// userUrl is the user that is being followed
+router.get('/followers/:userUrl', verifyUserLogged, async (req, res) => {
     try {
-        const followers = await UserFollows.find({ followsUserUrl: req.body.userUrl });
-        res.status(200).send(followers.map(follow => follow.userUrl));
+        const followers = await UserFollows.find({ userUrl: req.params.userUrl });
+        res.status(200).send(followers.map(follow => follow.followsUserUrl));
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
     }
 });
 
-router.get('/following', verifyUserLogged, async (req, res) => {
+// followsUserUrl is the user that follows another user
+router.get('/following/:userUrl', verifyUserLogged, async (req, res) => {
     try {
-        const following = await UserFollows.find({ userUrl: req.body.userUrl });
-        res.status(200).send(following.map(follow => follow.followsUserUrl));
+        const following = await UserFollows.find({ followsUserUrl: req.params.userUrl });
+        res.status(200).send(following.map(follow => follow.userUrl));
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
     }
 });
+
+router.get('/')
 
 module.exports = router;
