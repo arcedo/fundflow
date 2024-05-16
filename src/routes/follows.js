@@ -33,7 +33,7 @@ router.delete('/unfollow', verifyUserLogged, async (req, res) => {
 });
 
 // userUrl is the user that is being followed
-router.get('/followers/:userUrl', verifyUserLogged, async (req, res) => {
+router.get('/:userUrl/followers', verifyUserLogged, async (req, res) => {
     try {
         const followers = await UserFollows.find({ userUrl: req.params.userUrl });
         res.status(200).send(followers.map(follow => follow.followsUserUrl));
@@ -44,10 +44,23 @@ router.get('/followers/:userUrl', verifyUserLogged, async (req, res) => {
 });
 
 // followsUserUrl is the user that follows another user
-router.get('/following/:userUrl', verifyUserLogged, async (req, res) => {
+router.get('/:userUrl/following', verifyUserLogged, async (req, res) => {
     try {
         const following = await UserFollows.find({ followsUserUrl: req.params.userUrl });
         res.status(200).send(following.map(follow => follow.userUrl));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get('/:followUserUrl/isFollowing/:userUrl', verifyUserLogged, async (req, res) => {
+    try {
+        const follow = await UserFollows.findOne({ userUrl: req.params.userUrl, followsUserUrl: req.params.followUserUrl });
+        if (!follow) {
+            return res.status(404).send({ message: 'User is not following', code: 404 });
+        }
+        res.status(200).send({ message: 'User is following', code: 200 });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
