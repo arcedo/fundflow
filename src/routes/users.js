@@ -157,6 +157,7 @@ router.get('/:url', async (req, res) => {
         }));
         rows[0].following = await UserFollows.countDocuments({ userFollowUrl: rows[0].url });
         rows[0].followers = await UserFollows.countDocuments({ userUrl: rows[0].url });
+        console.log(rows[0]);
         res.json(rows);
     } catch (err) {
         console.error(err);
