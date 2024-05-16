@@ -545,12 +545,12 @@ router.get('/:titleUrl', async (req, res) => {
             WHERE p.url = ?`,
             [req.params.titleUrl]
         );
+        rows[0].deadlineDate = new Date(rows[0].deadlineDate).toISOString().split('T')[0];
         if (rows.length > 0) {
             res.status(200).json(rows[0]);
         } else {
             res.status(404).send({ message: 'No project found' });
         }
-        rows[0].deadlineDate = new Date(rows[0].deadlineDate).toISOString().split('T')[0];
     } catch (error) {
         console.error('Error in /:id route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
