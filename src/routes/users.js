@@ -149,6 +149,12 @@ router.get('/:url', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
+        console.log(await UserFollows.find({
+            $or: [
+                { userUrl: rows[0].url },
+                { followsUserUrl: rows[0].url }
+            ]
+        }));
         rows[0].following = await UserFollows.countDocuments({ userFollowUrl: rows[0].url });
         rows[0].followers = await UserFollows.countDocuments({ userUrl: rows[0].url });
         res.json(rows);
