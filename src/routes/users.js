@@ -154,7 +154,7 @@ router.get('/:url', async (req, res) => {
 
         console.log("User URL:", userUrl);
 
-        const count = await UserFollows.countDocuments({
+        const count = await UserFollows.find({
             $or: [
                 { userUrl: userUrl },
                 { followsUserUrl: userUrl }
