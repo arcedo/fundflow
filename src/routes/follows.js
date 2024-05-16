@@ -20,11 +20,10 @@ router.post('/follow', verifyUserLogged, async (req, res) => {
 
 router.delete('/unfollow', verifyUserLogged, async (req, res) => {
     try {
-        const follow = await UserFollows.findOne({ userUrl: req.body.userUrl, followsUserUrl: req.body.followUserUrl });
-        if (!follow) {
-            return res.status(404).send({ message: 'Follow not found', code: 404 });
+        const follow = await UserFollows.deleteOne({ userUrl: req.body.userUrl, followsUserUrl: req.body.followUserUrl });
+        if (follow.deletedCount === 0) {
+            return res.status(404).send({ message: 'User is not following', code: 404 });
         }
-        await follow.remove();
         res.status(200).send({ message: 'Unfollowed successfully', code: 200 });
     } catch (error) {
         console.error(error);
