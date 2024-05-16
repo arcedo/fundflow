@@ -149,15 +149,21 @@ router.get('/:url', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        console.log(await UserFollows.countDocuments({
-            $or: [
-                { userUrl: rows[0].url },
-                { followsUserUrl: rows[0].url }
-            ]
-        }));
-        rows[0].following = await UserFollows.countDocuments({ userFollowUrl: rows[0].url });
-        rows[0].followers = await UserFollows.countDocuments({ userUrl: rows[0].url });
-        console.log(rows[0]);
+
+        const userUrl = rows[0].url;
+
+        console.log("User URL:", userUrl);
+
+        const followingCount = await UserFollows.countDocuments({ userFollowUrl: userUrl });
+        console.log("Following count:", followingCount);
+
+        const followersCount = await UserFollows.countDocuments({ userUrl: userUrl });
+        console.log("Followers count:", followersCount);
+
+        rows[0].following = followingCount;
+        rows[0].followers = followersCount;
+
+        console.log("User data with following and followers:", rows[0]);
         res.json(rows);
     } catch (err) {
         console.error(err);
