@@ -547,7 +547,7 @@ router.get('/:titleUrl', async (req, res) => {
         );
         rows[0].deadlineDate = new Date(rows[0].deadlineDate).toISOString().split('T')[0];
         const stats = await getProjectStats(rows[0].id);
-        rows[0].stats = stats[0];
+        rows[0].stats = stats[0] ? stats[0] : {};
         if (rows.length > 0) {
             res.status(200).json(rows[0]);
         } else {
