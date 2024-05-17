@@ -65,10 +65,10 @@ router.put('/:id/stats', verifyUserLogged, async (req, res) => {
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found', code: 404 });
         }
-        if (evaluation === 'like') {
+        if (evaluation === 'likes') {
             stats.like = true;
             stats.dislike = false;
-        } else if (evaluation === 'dislike') {
+        } else if (evaluation === 'dislikes') {
             stats.like = false;
             stats.dislike = true;
         }
