@@ -30,6 +30,7 @@ const SrcImages = require('../models/srcImages');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
+const getProjectStats = require('../controllers/getProjectStats');
 //swagger documentation for projects
 /**
  * @swagger
@@ -125,34 +126,6 @@ async function executeQuery(sql, params) {
         console.error('Error executing database query:', error);
         throw error;
     }
-}
-
-async function getProjectStats(projectId) {
-    return await StatsProjects.aggregate([
-        {
-            $match: { idProject: projectId }
-        },
-        {
-            $group: {
-                _id: null,
-                views: { $sum: { $cond: [{ $eq: ["$view", true] }, 1, 0] } },
-                likes: { $sum: { $cond: [{ $eq: ["$like", true] }, 1, 0] } },
-                dislikes: { $sum: { $cond: [{ $eq: ["$dislike", true] }, 1, 0] } },
-                funded: { $sum: "$funded" },
-                collaborators: { $sum: { $cond: [{ $eq: ["$collaborator", true] }, 1, 0] } }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                views: 1,
-                likes: 1,
-                dislikes: 1,
-                funded: 1,
-                collaborators: 1
-            }
-        }
-    ]);
 }
 
 /**

@@ -3,15 +3,15 @@ const router = Router();
 
 const StatsProjects = require('../models/statsProjects');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
+const getProjectStats = require('../controllers/getProjectStats');
 
 router.get('/:id/stats', async (req, res) => {
     try {
-        const stats = await StatsProjects.find({ idProject: req.params.id });
-        if (stats.length > 0) {
-            res.status(200).send(stats);
-        } else {
-            res.status(404).send({ message: 'No stats found' });
+        const stats = await getProjectStats(req.params.id);
+        if (!stats) {
+            return res.status(404).send({ message: 'Stats not found' });
         }
+        res.status(200).send(stats[0]);
     } catch (error) {
         console.error('Error in /:id/stats route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
