@@ -7,9 +7,7 @@ const getProjectStats = require('../controllers/getProjectStats');
 
 router.get('/:id/stats', async (req, res) => {
     try {
-        console.log('req.params.id:', req.params.id);
-        const stats = await getProjectStats(req.params.id);
-        console.log('stats:', stats);
+        const stats = await getProjectStats(Number(req.params.id));
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found' });
         }
