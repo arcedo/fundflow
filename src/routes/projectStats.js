@@ -63,7 +63,7 @@ router.put('/:id/stats', verifyUserLogged, async (req, res) => {
         const { evaluation, fund, collaboration } = req.body;
         const stats = await StatsProjects.findOne({ idUser: (req.userId), idProject: (req.params.id) });
         if (!stats) {
-            return res.status(404).send({ message: 'Stats not found' });
+            return res.status(404).send({ message: 'Stats not found', code: 404 });
         }
         if (evaluation === 'like') {
             stats.like = true;
@@ -79,7 +79,7 @@ router.put('/:id/stats', verifyUserLogged, async (req, res) => {
             stats.collaborator = collaboration;
         }
         const result = await stats.save();
-        res.status(200).send(result);
+        res.status(200).send({ result, code: 200 });
     } catch (error) {
         console.error('Error in PUT /:id/stats route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
