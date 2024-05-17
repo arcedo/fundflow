@@ -7,12 +7,13 @@ const getProjectStats = require('../controllers/getProjectStats');
 
 router.get('/:id/stats', async (req, res) => {
     try {
+        console.log('req.params.id:', req.params.id);
         const stats = await getProjectStats(req.params.id);
-        console.log(stats[0]);
+        console.log('stats:', stats);
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found' });
         }
-        res.status(200).send(stats[0]);
+        res.status(200).send(stats);
     } catch (error) {
         console.error('Error in /:id/stats route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
