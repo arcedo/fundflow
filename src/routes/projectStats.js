@@ -11,7 +11,7 @@ router.get('/:id/stats', async (req, res) => {
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found' });
         }
-        res.status(200).send(stats);
+        res.status(200).send(stats[0]);
     } catch (error) {
         console.error('Error in /:id/stats route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -43,6 +43,7 @@ router.post('/:id/stats', verifyUserLogged, async (req, res) => {
     }
 });
 
+//TODO: toggle view
 router.put('/:id/stats/views', verifyUserLogged, async (req, res) => {
     try {
         const stats = await StatsProjects.findOne({ idUser: req.userId, idProject: req.params.id });
