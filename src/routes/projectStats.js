@@ -26,7 +26,7 @@ router.post('/:id/stats', verifyUserLogged, async (req, res) => {
         }
         const userViewed = await StatsProjects.findOne({ idUser: req.userId, idProject: req.params.id, idCategory });
         if (userViewed) {
-            return res.status(400).send({ message: 'User already viewed this project' });
+            return res.status(200).send({ message: 'User already viewed this project', code: 200 });
         } else {
             const stats = new StatsProjects({
                 idUser: req.userId,
@@ -35,7 +35,7 @@ router.post('/:id/stats', verifyUserLogged, async (req, res) => {
                 view: true
             });
             const result = await stats.save();
-            res.status(201).send(result);
+            res.status(201).send({ result, code: 201 });
         }
     } catch (error) {
         console.error('Error in POST /:id/stats route:', error);
