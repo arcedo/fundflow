@@ -1,9 +1,7 @@
 const StatsProjects = require('../models/statsProjects');
 
 async function getProjectStats(projectId) {
-    console.log('Inside getProjectStats, projectId:', projectId);
-
-    const pipeline = [
+    return await StatsProjects.aggregate([
         {
             $match: { idProject: projectId }
         },
@@ -27,14 +25,7 @@ async function getProjectStats(projectId) {
                 collaborators: 1
             }
         }
-    ];
-
-    console.log('Aggregation pipeline:', JSON.stringify(pipeline, null, 2));
-
-    const result = await StatsProjects.aggregate(pipeline).exec();
-
-    console.log('Aggregate result:', result);
-    return result;
+    ]);
 }
 
 module.exports = getProjectStats;
