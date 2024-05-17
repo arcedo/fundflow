@@ -371,12 +371,13 @@ router.put('/profilePicture', verifyUserLogged, uploadProfilePicture.single('pro
         const passwordMatch = await Bun.password.verify(password, currentUserRows[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
+        } else {
+            const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+            if (rows.affectedRows === 0) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json({ message: 'Profile picture updated successfully', id: req.userId });
         }
-        const [rows, fields] = await db.getPromise().query('UPDATE users SET profilePictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-        if (rows.affectedRows === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json({ message: 'Profile picture updated successfully', id: req.userId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
@@ -396,12 +397,13 @@ router.put('/profileCover', verifyUserLogged, uploadProfileCover.single('profile
         const passwordMatch = await Bun.password.verify(password, currentUserRows[0].hashPassword);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Password is incorrect' });
+        } else {
+            const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
+            if (rows.affectedRows === 0) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json({ message: 'Profile cover updated successfully', id: req.userId });
         }
-        const [rows, fields] = await db.getPromise().query('UPDATE users SET bannerPictureSrc = ? WHERE id = ?', [req.file.path, req.userId]);
-        if (rows.affectedRows === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json({ message: 'Profile cover updated successfully', id: req.userId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
