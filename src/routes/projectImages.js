@@ -179,7 +179,7 @@ router.delete('/:id/image/:imageId', verifyUserLogged, verifyAdminRole, async (r
             const result = await SrcImages.deleteOne({ idProject: req.params.id, _id: req.params.imageId });
             if (result.deletedCount > 0) {
                 fs.unlinkSync(projectImg.src);
-                res.status(200).send({ message: 'Image deleted successfully' });
+                res.status(200).send({ message: 'Image deleted successfully', code: 200 });
             } else {
                 res.status(404).send({ message: 'No image found' });
             }
