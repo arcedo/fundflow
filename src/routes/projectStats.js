@@ -5,6 +5,19 @@ const StatsProjects = require('../models/statsProjects');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const getProjectStats = require('../controllers/getProjectStats');
 
+router.get('/:id/stats/user/', verifyUserLogged, async (req, res) => {
+    try {
+        const stats = await StatsProjects.findOne({ idUser: Number(req.userId), idProject: Number(req.params.id) });
+        if (!stats) {
+            return res.status(404).send({ message: 'Stats not found', code: 404 });
+        }
+        res.status(200).send(stats[0]);
+    } catch (error) {
+        console.error('Error in /:id/stats/user/:idUser route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
 router.get('/:id/stats', async (req, res) => {
     try {
         const stats = await getProjectStats(Number(req.params.id));

@@ -508,6 +508,51 @@ router.get('/byId/:id', async (req, res) => {
     }
 });
 
+// Example request: /projects/byEvaluation/1?evaluation=like
+router.get('/byEvaluation/:idUser', async (req, res) => {
+    const { idUser } = req.params;
+    const { evaluation } = req.query;
+    try {
+        let projects = [];
+        switch (evaluation) {
+            case 'like':
+                projects = await StatsProjects.find({ idUser, likes: true });
+                break;
+            case 'dislike':
+                projects = await StatsProjects.find({ idUser, dislikes: true });
+                break;
+            case 'funded':
+                projects = await StatsProjects.find({ idUser, funded: true });
+                break;
+            case 'collaborator':
+                projects = await StatsProjects.find({ idUser, collaborator: true });
+                break;
+            default:
+                return res.status(400).send({ message: 'Invalid evaluation type' });
+                break;
+        }
+        if (projects.length < 1) {
+            return res.status(404).send({ message: 'No projects found' });
+        } else {
+            const projectIds = projects.map((project) => project.idProject);
+            const rows = await executeQuery(
+                `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+                FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
+                WHERE p.id IN (?)`,
+                [projectIds]
+            );
+            if (rows.length > 0) {
+                res.status(200).json(rows);
+            } else {
+                res.status(404).send({ message: 'No projects found' });
+            }
+        }
+    } catch (error) {
+        console.error('Error in /byEvaluation/:idUser route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
 router.get('/:titleUrl', async (req, res) => {
     try {
         const rows = await executeQuery(
