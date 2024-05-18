@@ -175,10 +175,10 @@ router.get('/', validateQueryParams, async (req, res) => {
             [req.startIndex, req.limit]
         );
         if (rows.length > 0) {
-            for (const row of rows) {
-                // Merge the stats object with the project object
-                row.stats = getProjectStats(row.id);
-            }
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
             res.status(200).json(rows);
         } else {
             res.status(404).send({ message: 'No projects found' });
@@ -236,10 +236,10 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
             [likedProjectsIds, req.startIndex, req.limit]
         );
         if (rows.length > 0) {
-            for (const row of rows) {
-                // Merge the stats object with the project object
-                row.stats = getProjectStats(row.id);
-            }
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
             res.status(200).json(rows);
         } else {
             res.status(404).send({ message: 'No projects found' });
@@ -299,10 +299,10 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
             [req.params.idCategory, req.startIndex, req.limit]
         );
         if (rows.length > 0) {
-            for (const row of rows) {
-                // Merge the stats object with the project object
-                row.stats = getProjectStats(row.id);
-            }
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
             res.status(200).json(rows);
         } else {
             res.status(404).send({ message: 'No projects found' });
@@ -361,10 +361,10 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
             LIMIT ?, ?`,
             [req.params.idUser, req.startIndex, req.limit]);
         if (rows.length > 0) {
-            for (const row of rows) {
-                // Merge the stats object with the project object
-                row.stats = getProjectStats(row.id);
-            }
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
             res.status(200).json(rows);
         } else {
             res.status(404).send({ message: 'No projects found' });
@@ -384,11 +384,10 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
             LIMIT ?, ?`,
             [req.userId, req.startIndex, req.limit]);
         if (rows.length > 0) {
-            for (const row of rows) {
-                // Merge the stats object with the project object
-                row.stats = getProjectStats(row.id);
-                row.imgs = await SrcImages.find({ idProject: row.id });
-            }
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
             res.status(200).json(rows);
         } else {
             res.status(404).send({ message: 'No projects found' });
@@ -445,11 +444,11 @@ router.get('/random', validateQueryParams, async (req, res) => {
             [req.startIndex, req.limit]
         );
         if (rows.length > 0) {
-            for (const row of rows) {
-                // Merge the stats object with the project object
-                row.stats = getProjectStats(row.id);
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
                 row.imgs = await SrcImages.find({ idProject: row.id });
-            }
+            }));
             res.status(200).json(rows);
         } else {
             res.status(404).send({ message: 'No projects found' });
