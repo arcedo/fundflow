@@ -514,8 +514,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
     const { evaluation } = req.query;
     try {
         let projects = [];
-        console.log(evaluation);
-        switch (String(evaluation)) {
+        switch (evaluation.toLowerCase()) {
             case 'like':
                 projects = await StatsProjects.find({ idUser, likes: true });
                 break;
@@ -527,9 +526,6 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 break;
             case 'collaborator':
                 projects = await StatsProjects.find({ idUser, collaborator: true });
-                break;
-            default:
-                return res.status(400).send({ message: 'Invalid evaluation type' });
                 break;
         }
         if (projects.length < 1) {
