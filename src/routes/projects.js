@@ -533,19 +533,16 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
         if (projects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         } else {
-            console.log([...projects.map((project) => project.idProject), req.startIndex, req.limit]);
             const [rows, fields] = await await db.getPromise().query(
                 `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id)
             WHERE p.id IN (${projects.map((project) => project.idProject).join(',')})
             LIMIT ?, ?`, [req.startIndex, req.limit]
             )
-            console.log(rows);
-            //await Promise.all(rows.map(async (row) => {
-            //     const stats = await getProjectStats(row.id);
-            //     row.stats = stats[0] ? stats[0] : {};
-            // }));
-
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
             if (rows.length > 0) {
                 res.status(200).json(rows);
             } else {
