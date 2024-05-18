@@ -533,6 +533,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
         if (projects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         } else {
+            console.log([projects.map((project) => project.idProject), req.startIndex, req.limit]);
             const [rows, fields] = await executeQuery(
                 `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id)
