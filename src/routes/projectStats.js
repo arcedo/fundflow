@@ -11,7 +11,7 @@ router.get('/:id/stats/user/', verifyUserLogged, async (req, res) => {
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found', code: 404 });
         }
-        res.status(200).send(stats[0]);
+        res.status(200).send(stats);
     } catch (error) {
         console.error('Error in /:id/stats/user/:idUser route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
