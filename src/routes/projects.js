@@ -536,28 +536,30 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             const projectIds = projects.map((project) => project.idProject);
             console.log('Project IDs:', projectIds);
 
-            // Correctly format the projectIds array for the SQL query
-            const placeholders = projectIds.map(() => '?').join(',');
+            // Build the SQL query using OR conditions
+            const orConditions = projectIds.map(id => `p.id = ?`).join(' OR ');
             const query = `
                 SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
                 FROM projects p 
                 JOIN users u ON p.idUser = u.id 
                 JOIN categories c ON p.idCategory = c.id 
-                WHERE p.id IN (${placeholders})
+                WHERE ${orConditions}
                 LIMIT ?, ?`;
 
-            let [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
+            const [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
             console.log('Query Results:', rows);
 
+            // Ensure rows is always an array
             if (!Array.isArray(rows)) {
                 rows = [rows];
             }
 
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
+
             if (rows.length > 0) {
-                await Promise.all(rows.map(async (row) => {
-                    const stats = await getProjectStats(row.id);
-                    row.stats = stats[0] ? stats[0] : {};
-                }));
                 res.status(200).json(rows);
             } else {
                 res.status(404).send({ message: 'No projects found' });
@@ -568,6 +570,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
         res.status(500).send({ message: 'Internal Server Error' });
     }
 });
+
 
 router.get('/:titleUrl', async (req, res) => {
     try {
