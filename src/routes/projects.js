@@ -538,6 +538,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 LIMIT ?, ?`,
                 [projectIds, req.startIndex, req.limit]
             );
+            console.log(rows);
             if (!Array.isArray(rows)) {
                 rows = [rows];
             }
