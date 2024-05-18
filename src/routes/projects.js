@@ -542,11 +542,10 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 FROM projects p 
                 JOIN users u ON p.idUser = u.id 
                 JOIN categories c ON p.idCategory = c.id 
-                WHERE ${projectIds.map(() => 'p.id = ?').join(' OR ')}
-                LIMIT ?, ?`;
+                WHERE ${projectIds.map(() => 'p.id = ?').join(' OR ')}`;
             console.log('Query:', query);
             console.log('Query Params:', [...projectIds, req.startIndex, req.limit]);
-            const [rows, fields] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
+            const [rows, fields] = await executeQuery(query, [...projectIds]);
             console.log('Query Results:', rows);
             // await Promise.all(rows.map(async (row) => {
             //     const stats = await getProjectStats(row.id);
