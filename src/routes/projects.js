@@ -537,15 +537,14 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             console.log('Project IDs:', projectIds);
 
             // Build the SQL query using OR conditions
-            const orConditions = projectIds.map(id => `p.id = ?`).join(' OR ');
             const query = `
                 SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
                 FROM projects p 
                 JOIN users u ON p.idUser = u.id 
                 JOIN categories c ON p.idCategory = c.id 
-                WHERE ${orConditions}
+                WHERE p.id IN (${projectIds.map(() => '?').join(', ')})
                 LIMIT ?, ?`;
-
+            console.log('Query:', query);
             let [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
             console.log('Query Results:', rows);
 
