@@ -735,9 +735,9 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
         }
         // Check if the project was successfully updated
         if (result.affectedRows > 0) {
-            res.status(200).send({ message: 'Project updated successfully' });
+            res.status(200).send({ message: 'Project updated successfully', code: 200, id: req.params.id, url: url });
         } else {
-            res.status(400).send({ message: 'Unable to update project' });
+            res.status(400).send({ message: 'Unable to update project', code: 400 });
         }
     } catch (error) {
         console.error('Error in PUT /:id route:', error);
