@@ -510,24 +510,23 @@ router.get('/byId/:id', async (req, res) => {
 
 // Example request: /projects/byEvaluation/?evaluation=like&startIndex=0&limit=10
 router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, res) => {
-    const { idUser } = req.userId;
     const { evaluation } = req.query;
     try {
         let projects = [];
-        console.log('idUser', idUser);
+        console.log('idUser', req.userId);
         console.log('evaluation', evaluation);
         switch (evaluation.toLowerCase()) {
             case 'like':
-                projects = await StatsProjects.find({ idUser, like: true });
+                projects = await StatsProjects.find({ idUser: req.userId, like: true });
                 break;
             case 'dislike':
-                projects = await StatsProjects.find({ idUser, dislike: true });
+                projects = await StatsProjects.find({ idUser: req.userId, dislike: true });
                 break;
             case 'funded':
-                projects = await StatsProjects.find({ idUser, funded: true });
+                projects = await StatsProjects.find({ idUser: req.userId, funded: true });
                 break;
             case 'collaborator':
-                projects = await StatsProjects.find({ idUser, collaborator: true });
+                projects = await StatsProjects.find({ idUser: req.userId, collaborator: true });
                 break;
         }
         console.log('projects', projects);
