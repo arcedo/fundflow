@@ -528,6 +528,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 projects = await StatsProjects.find({ idUser, collaborator: true });
                 break;
         }
+        console.log('projects', projects);
         if (projects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         } else {
