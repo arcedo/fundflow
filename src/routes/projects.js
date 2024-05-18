@@ -526,36 +526,41 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             case 'collaborator':
                 projects = await StatsProjects.find({ idUser: req.userId, collaborator: true });
                 break;
+            default:
+                return res.status(400).send({ message: 'Invalid evaluation type' });
         }
+
         if (projects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         } else {
             const projectIds = projects.map((project) => project.idProject);
-            console.log(projectIds);
-            let [rows, fields] = await executeQuery(
-                `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-                FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
-                WHERE p.id IN (?) 
-                LIMIT ?, ?`,
-                [projectIds, req.startIndex, req.limit]
-            );
-            console.log(rows);
-            if (!Array.isArray(rows)) {
-                rows = [rows];
-            }
-            console.log(rows);
-            await Promise.all(rows.map(async (row) => {
-                const stats = await getProjectStats(row.id);
-                row.stats = stats[0] ? stats[0] : {};
-            }));
+            console.log('Project IDs:', projectIds);
+
+            // Correctly format the projectIds array for the SQL query
+            const placeholders = projectIds.map(() => '?').join(',');
+            const query = `
+                SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+                FROM projects p 
+                JOIN users u ON p.idUser = u.id 
+                JOIN categories c ON p.idCategory = c.id 
+                WHERE p.id IN (${placeholders})
+                LIMIT ?, ?`;
+
+            const [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
+            console.log('Query Results:', rows);
+
             if (rows.length > 0) {
+                await Promise.all(rows.map(async (row) => {
+                    const stats = await getProjectStats(row.id);
+                    row.stats = stats[0] ? stats[0] : {};
+                }));
                 res.status(200).json(rows);
             } else {
                 res.status(404).send({ message: 'No projects found' });
             }
         }
     } catch (error) {
-        console.error('Error in /byEvaluation/:idUser route:', error);
+        console.error('Error in /byEvaluation/ route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
     }
 });
