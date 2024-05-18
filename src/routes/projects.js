@@ -542,7 +542,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 FROM projects p 
                 JOIN users u ON p.idUser = u.id 
                 JOIN categories c ON p.idCategory = c.id 
-                WHERE p.id IN (${projectIds.map(() => '?').join(', ')})
+                WHERE ${projectIds.map(() => 'p.id = ?').join(' OR ')}
                 LIMIT ?, ?`;
             console.log('Query:', query);
             console.log('Query Params:', [...projectIds, req.startIndex, req.limit]);
