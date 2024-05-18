@@ -514,6 +514,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
     const { evaluation } = req.query;
     try {
         let projects = [];
+        console.log('idUser', idUser);
         console.log('evaluation', evaluation);
         switch (evaluation.toLowerCase()) {
             case 'like':
