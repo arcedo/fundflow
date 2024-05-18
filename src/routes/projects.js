@@ -545,6 +545,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 WHERE p.id IN (${projectIds.map(() => '?').join(', ')})
                 LIMIT ?, ?`;
             console.log('Query:', query);
+            console.log('Query Params:', [...projectIds, req.startIndex, req.limit]);
             let [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
             console.log('Query Results:', rows);
 
