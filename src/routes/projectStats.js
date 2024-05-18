@@ -56,7 +56,6 @@ router.post('/:id/stats', verifyUserLogged, async (req, res) => {
     }
 });
 
-//TODO: toggle view
 router.put('/:id/stats/views', verifyUserLogged, async (req, res) => {
     try {
         const stats = await StatsProjects.findOne({ idUser: req.userId, idProject: req.params.id });
@@ -72,19 +71,20 @@ router.put('/:id/stats/views', verifyUserLogged, async (req, res) => {
     }
 });
 
+
 router.put('/:id/stats', verifyUserLogged, async (req, res) => {
     try {
-        const { evaluation, fund, collaboration } = req.body;
+        const { evaluation, fund, collaboration, evaluationStatus } = req.body;
         const stats = await StatsProjects.findOne({ idUser: (req.userId), idProject: (req.params.id) });
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found', code: 404 });
         }
         if (evaluation === 'likes') {
-            stats.like = true;
+            stats.like = evaluationStatus;
             stats.dislike = false;
         } else if (evaluation === 'dislikes') {
             stats.like = false;
-            stats.dislike = true;
+            stats.dislike = evaluationStatus;
         }
         if (fund) {
             stats.funded = fund;
