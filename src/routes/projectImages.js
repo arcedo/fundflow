@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
         cb(null, newFileName);
     }
 });
-const upload = multer({ storage });
+const uploadProjectImages = multer({ storage });
 
 // Schema
 const SrcImages = require('../models/srcImages');
@@ -98,7 +98,7 @@ router.get('/:id/srcImages', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.post('/:id/image', verifyUserLogged, upload.single('image'), async (req, res) => {
+router.post('/:id/image', verifyUserLogged, uploadProjectImages.single('image'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send({ message: 'Image is missing', code: 400 });
