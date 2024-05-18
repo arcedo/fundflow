@@ -168,16 +168,17 @@ router.post('/:id/image', verifyUserLogged, uploadProjectImages.single('image'),
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id/image/', verifyUserLogged, verifyAdminRole, async (req, res) => {
+router.delete('/:id/image/:imageId', verifyUserLogged, verifyAdminRole, async (req, res) => {
     try {
         let rows;
         if (req.admin !== true) {
             rows = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         }
         if (rows.length > 0 || req.admin === true) {
-            const result = await SrcImages.deleteOne({ idProject: req.params.id, src: req.body.src });
+            const projectImg = await SrcImages.findOne({ idProject: req.params.id, _id: req.params.imageId });
+            const result = await SrcImages.deleteOne({ idProject: req.params.id, _id: req.params.imageId });
             if (result.deletedCount > 0) {
-                fs.unlinkSync(req.body.src);
+                fs.unlinkSync(projectImg.src);
                 res.status(200).send({ message: 'Image deleted successfully' });
             } else {
                 res.status(404).send({ message: 'No image found' });
