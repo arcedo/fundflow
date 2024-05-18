@@ -546,18 +546,12 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 LIMIT ?, ?`;
             console.log('Query:', query);
             console.log('Query Params:', [...projectIds, req.startIndex, req.limit]);
-            let [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
+            const [rows, fields] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
             console.log('Query Results:', rows);
-
-            // Ensure rows is always an array
-            if (!Array.isArray(rows)) {
-                rows = [rows];
-            }
-
-            await Promise.all(rows.map(async (row) => {
-                const stats = await getProjectStats(row.id);
-                row.stats = stats[0] ? stats[0] : {};
-            }));
+            // await Promise.all(rows.map(async (row) => {
+            //     const stats = await getProjectStats(row.id);
+            //     row.stats = stats[0] ? stats[0] : {};
+            // }));
 
             if (rows.length > 0) {
                 res.status(200).json(rows);
