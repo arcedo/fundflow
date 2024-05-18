@@ -53,7 +53,7 @@ router.get('/:id/image/:img', async (req, res) => {
     }
 });
 
-router.get('/:id/srcImgs', async (req, res) => {
+router.get('/:id/srcImages', async (req, res) => {
     const projectImgsSrc = await SrcImages.find({ idProject: req.params.id });
     if (projectImgsSrc.length > 0) {
         res.status(200).send(projectImgsSrc);
