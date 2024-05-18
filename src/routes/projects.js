@@ -516,10 +516,10 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
         let projects = [];
         switch (evaluation.toLowerCase()) {
             case 'like':
-                projects = await StatsProjects.find({ idUser, likes: true });
+                projects = await StatsProjects.find({ idUser, like: true });
                 break;
             case 'dislike':
-                projects = await StatsProjects.find({ idUser, dislikes: true });
+                projects = await StatsProjects.find({ idUser, dislike: true });
                 break;
             case 'funded':
                 projects = await StatsProjects.find({ idUser, funded: true });
