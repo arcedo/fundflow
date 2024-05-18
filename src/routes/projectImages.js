@@ -58,7 +58,7 @@ router.get('/:id/srcImages', async (req, res) => {
     if (projectImgsSrc.length > 0) {
         res.status(200).send(projectImgsSrc);
     } else {
-        res.status(404).send({ message: 'No images found' });
+        res.status(404).send({ message: 'No images found', code: 400 });
     }
 });
 
