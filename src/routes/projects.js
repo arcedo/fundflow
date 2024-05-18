@@ -514,6 +514,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
     const { evaluation } = req.query;
     try {
         let projects = [];
+        console.log(evaluation);
         switch (evaluation) {
             case 'like':
                 projects = await StatsProjects.find({ idUser, likes: true });
