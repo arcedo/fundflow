@@ -101,23 +101,28 @@ router.get('/:id/srcImgs', async (req, res) => {
 router.post('/:id/image', verifyUserLogged, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).send({ message: 'Image is missing' });
+            return res.status(400).send({ message: 'Image is missing', code: 400 });
         }
         const verifyExistingProject = await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (verifyExistingProject.length > 0) {
             // Save the image source in the database (MongoDB)
-            const savedImgSrc = new SrcImages({
-                idProject: req.params.id,
-                src: req.file.path
-            });
-            savedImgSrc.save()
-                .then((result) => {
-                    res.status(201).send({ message: 'Image created successfully', id: result._id });
-                })
-                .catch((error) => {
-                    console.error('Error saving image source in MongoDB:', error);
-                    res.status(400).send({ message: 'Unable to create image' });
+            const currentImages = await SrcImages.find({ idProject: req.params.id });
+            if (currentImages.length >= 4) {
+                res.status(400).send({ message: 'Maximum number of images reached', code: 400 });
+            } else {
+                const savedImgSrc = new SrcImages({
+                    idProject: req.params.id,
+                    src: req.file.path
                 });
+                savedImgSrc.save()
+                    .then((result) => {
+                        res.status(201).send({ message: 'Image created successfully', id: result._id });
+                    })
+                    .catch((error) => {
+                        console.error('Error saving image source in MongoDB:', error);
+                        res.status(400).send({ message: 'Unable to create image', code: 400 });
+                    });
+            }
         } else {
             res.status(403).send({ message: 'Forbidden' });
         }
