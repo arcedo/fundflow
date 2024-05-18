@@ -533,21 +533,14 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
         if (projects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         } else {
-            const projectIds = projects.map((project) => project.idProject);
-            console.log('Project IDs:', projectIds);
-
-            // Build the SQL query using OR conditions
-            const query = `
-                SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-                FROM projects p 
-                JOIN users u ON p.idUser = u.id 
-                JOIN categories c ON p.idCategory = c.id 
-                WHERE ${projectIds.map(() => 'p.id = ?').join(' OR ')}`;
-            console.log('Query:', query);
-            console.log('Query Params:', [...projectIds]);
-            const [rows, fields] = await executeQuery(query, [...projectIds]);
-            console.log('Query Results:', rows);
-            // await Promise.all(rows.map(async (row) => {
+            const [rows, fields] = await executeQuery(
+                `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+            FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id)
+            WHERE p.id IN (?)
+            LIMIT ?, ?`, [...projects.map((project) => project.idProject), req.startIndex, req.limit]
+            )
+            console.log(rows);
+            //await Promise.all(rows.map(async (row) => {
             //     const stats = await getProjectStats(row.id);
             //     row.stats = stats[0] ? stats[0] : {};
             // }));
