@@ -711,19 +711,25 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
         }
 
         let result;
+        let url = title.replace(/\s+/g, '_').toLowerCase();
+
+        const urlInUse = await executeQuery('SELECT id FROM projects WHERE url = ? AND id != ?', [url, req.params.id]);
+        if (urlInUse.length > 0) {
+            url = `${url}_${urlInUse.length}`;
+        }
         if (typeGoal === 'price' && !currency) {
             return res.status(400).send({ message: 'Currency is required!' });
         } else if (typeGoal === 'price') {
             // Execute the database query
             const rows = await executeQuery(
-                'UPDATE projects SET idCategory = ?, title = ?, url = ?, description = ?, collGoal = ?, currency = ?, deadlineDate = ? WHERE id = ?',
-                [idCategory, title, title.replace(/\s+/g, '_').toLowerCase(), description, goal, currency, parsedDeadlineDate, req.params.id]
+                'UPDATE projects SET idCategory = ?, title = ?, url = ?, description = ?, priceGoal = ?, currency = ?, deadlineDate = ? WHERE id = ?',
+                [idCategory, title, url, description, goal, currency, parsedDeadlineDate, req.params.id]
             );
             result = rows;
         } else {
             const rows = await executeQuery(
                 'UPDATE projects SET idCategory = ?, title = ?, url= ?, description = ?, collGoal = ?, deadlineDate = ? WHERE id = ?',
-                [idCategory, title, title.replace(/\s+/g, '_').toLowerCase(), description, goal, parsedDeadlineDate, req.params.id]
+                [idCategory, title, url, description, goal, parsedDeadlineDate, req.params.id]
             );
             result = rows;
         }
