@@ -544,7 +544,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 JOIN categories c ON p.idCategory = c.id 
                 WHERE ${projectIds.map(() => 'p.id = ?').join(' OR ')}`;
             console.log('Query:', query);
-            console.log('Query Params:', [...projectIds, req.startIndex, req.limit]);
+            console.log('Query Params:', [...projectIds]);
             const [rows, fields] = await executeQuery(query, [...projectIds]);
             console.log('Query Results:', rows);
             // await Promise.all(rows.map(async (row) => {
