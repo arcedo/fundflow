@@ -541,6 +541,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             if (!Array.isArray(rows)) {
                 rows = [rows];
             }
+            console.log(rows);
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
