@@ -546,7 +546,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 WHERE ${orConditions}
                 LIMIT ?, ?`;
 
-            const [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
+            let [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
             console.log('Query Results:', rows);
 
             // Ensure rows is always an array
