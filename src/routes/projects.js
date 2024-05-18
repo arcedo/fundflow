@@ -549,6 +549,10 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             const [rows] = await executeQuery(query, [...projectIds, req.startIndex, req.limit]);
             console.log('Query Results:', rows);
 
+            if (!Array.isArray(rows)) {
+                rows = [rows];
+            }
+
             if (rows.length > 0) {
                 await Promise.all(rows.map(async (row) => {
                     const stats = await getProjectStats(row.id);
