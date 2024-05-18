@@ -513,8 +513,6 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
     const { evaluation } = req.query;
     try {
         let projects = [];
-        console.log('idUser', req.userId);
-        console.log('evaluation', evaluation);
         switch (evaluation.toLowerCase()) {
             case 'like':
                 projects = await StatsProjects.find({ idUser: req.userId, like: true });
@@ -529,13 +527,10 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 projects = await StatsProjects.find({ idUser: req.userId, collaborator: true });
                 break;
         }
-        console.log('projects', projects);
         if (projects.length < 1) {
-            console.log('No projects found');
             return res.status(404).send({ message: 'No projects found' });
         } else {
             const projectIds = projects.map((project) => project.idProject);
-            console.log('projectIds', projectIds);
             const rows = await executeQuery(
                 `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
                 FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
@@ -546,7 +541,6 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             if (rows.length > 0) {
                 res.status(200).json(rows);
             } else {
-                console.log('No projects found 2');
                 res.status(404).send({ message: 'No projects found' });
             }
         }
