@@ -531,13 +531,17 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             return res.status(404).send({ message: 'No projects found' });
         } else {
             const projectIds = projects.map((project) => project.idProject);
-            const [rows, fields] = await executeQuery(
+            let [rows, fields] = await executeQuery(
                 `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
                 FROM projects p JOIN users u ON(p.idUser LIKE u.id) JOIN categories c ON(p.idCategory LIKE c.id) 
                 WHERE p.id IN (?) 
                 LIMIT ?, ?`,
                 [projectIds, req.startIndex, req.limit]
             );
+            console.log(rows);
+            if (!Array.isArray(rows)) {
+                rows = [rows];
+            }
             console.log(rows);
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
