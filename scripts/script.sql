@@ -37,7 +37,7 @@ CREATE TABLE fundflow.projects (
     title VARCHAR(50) NOT NULL,
     description VARCHAR(250) NOT NULL,
     url VARCHAR(250) UNIQUE NOT NULL,
-    about VARCHAR(250),
+    about LONGTEXT,
     priceGoal BIGINT UNSIGNED DEFAULT NULL,
     currency VARCHAR(10) DEFAULT NULL,
     collGoal BIGINT UNSIGNED DEFAULT NULL,
@@ -46,15 +46,6 @@ CREATE TABLE fundflow.projects (
     coverImageSrc VARCHAR(250),
     FOREIGN KEY (idCategory) REFERENCES fundflow.categories(id),
     FOREIGN KEY (idUser) REFERENCES fundflow.users(id) ON DELETE SET NULL
-);
-
-CREATE TABLE fundflow.tiers (
-	id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
-	idProject BIGINT UNSIGNED NOT NULL,
-	description VARCHAR(250),
-	price DOUBLE NOT NULL,
-	srcImage VARCHAR(250),
-	FOREIGN KEY (idProject) REFERENCES fundflow.projects(id) 
 );
 
 -- Default categories

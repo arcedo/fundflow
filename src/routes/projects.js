@@ -581,6 +581,25 @@ router.get('/:titleUrl', async (req, res) => {
     }
 });
 
+router.get('/:titleUrl/about', async (req, res) => {
+    try {
+        const rows = await executeQuery(
+            `SELECT about
+            FROM projects
+            WHERE url = ?`,
+            [req.params.titleUrl]
+        );
+        if (rows.length > 0) {
+            res.status(200).json(rows[0]);
+        } else {
+            res.status(404).send({ message: 'No project found', code: 404 });
+        }
+    } catch (error) {
+        console.error('Error in /:id/about route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
 /**
  * @swagger
  * /projects:
@@ -858,15 +877,15 @@ router.put('/:id/about', verifyUserLogged, async (req, res) => {
         const { about } = req.body;
         // Validate required fields and their types/format if necessary
         if (!about) {
-            return res.status(400).send({ message: 'About is required!' });
+            return res.status(400).send({ message: 'About is required!', code: 400 });
         }
         // Execute the database query
         const rows = await executeQuery('UPDATE projects SET about = ? WHERE id = ?', [about, req.params.id]);
         // Check if the project was successfully updated
         if (rows.affectedRows > 0) {
-            res.status(200).send({ message: 'Project about updated successfully' });
+            res.status(200).send({ message: 'Project about updated successfully', code: 200 });
         } else {
-            res.status(400).send({ message: 'Unable to update project about' });
+            res.status(400).send({ message: 'Unable to update project about', code: 400 });
         }
     } catch (error) {
         console.error('Error in PUT /:id/about route:', error);

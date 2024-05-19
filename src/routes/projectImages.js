@@ -3,10 +3,10 @@ const router = Router();
 const fs = require('fs');
 const path = require('path');
 const db = require('../database/mySqlConnection');
+const multer = require('multer');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
-const multer = require('multer');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
