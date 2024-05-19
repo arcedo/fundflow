@@ -22,3 +22,5 @@ const tiersProjectSchema = new Schema({
 });
 
 const TiersProjects = model('tiersProjects', tiersProjectSchema);
+
+module.exports = TiersProjects;
