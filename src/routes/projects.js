@@ -589,11 +589,8 @@ router.get('/:id/about', async (req, res) => {
             WHERE id = ?`,
             [req.params.id]
         );
-        if (rows.length > 0) {
-            res.status(200).json(rows[0]);
-        } else {
-            res.status(404).send({ message: 'No project found', code: 404 });
-        }
+        console.log(rows);
+        res.status(200).json(rows[0]);
     } catch (error) {
         console.error('Error in /:id/about route:', error);
         res.status(500).send({ message: 'Internal Server Error' });
