@@ -23,6 +23,7 @@ const uploadProjectCover = multer({
 const projectBlogs = require('./projectBlogs');
 const projectImages = require('./projectImages');
 const projectStats = require('./projectStats');
+const projectTiers = require('./projectTiers');
 
 // Schemas
 const StatsProjects = require('../models/statsProjects');
@@ -948,5 +949,6 @@ router.delete('/:id', verifyUserLogged, verifyAdminRole, async (req, res) => {
 router.use('/', projectBlogs);
 router.use('/', projectImages);
 router.use('/', projectStats);
+router.use('/', projectTiers);
 
 module.exports = router;
