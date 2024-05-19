@@ -581,13 +581,13 @@ router.get('/:titleUrl', async (req, res) => {
     }
 });
 
-router.get('/:titleUrl/about', async (req, res) => {
+router.get('/:id/about', async (req, res) => {
     try {
         const rows = await executeQuery(
             `SELECT about
             FROM projects
-            WHERE url = ?`,
-            [req.params.titleUrl]
+            WHERE id = ?`,
+            [req.params.id]
         );
         if (rows.length > 0) {
             res.status(200).json(rows[0]);
