@@ -32,6 +32,7 @@ const SrcImages = require('../models/srcImages');
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
 const getProjectStats = require('../controllers/getProjectStats');
+const validateQueryParams = require('../controllers/validateQueryParams');
 //swagger documentation for projects
 /**
  * @swagger
@@ -106,19 +107,6 @@ const getProjectStats = require('../controllers/getProjectStats');
  *         // Define properties of StatsProjects schema here
  */
 
-function validateQueryParams(req, res, next) {
-    const startIndex = parseInt(req.query.startIndex, 10);
-    const limit = parseInt(req.query.limit, 10);
-    if (startIndex > 0 && limit > 0) {
-        return res.status(400).send({ message: 'startIndex and limit query parameters are required' });
-    } else {
-        // Store the validated values in the request object
-        req.startIndex = startIndex;
-        req.limit = limit;
-        next();
-    }
-}
-
 async function executeQuery(sql, params) {
     try {
         const [rows, fields] = await db.getPromise().query(sql, params);
@@ -174,6 +162,32 @@ router.get('/', validateQueryParams, async (req, res) => {
             ORDER BY p.creationDate DESC 
             LIMIT ?, ?`,
             [req.startIndex, req.limit]
+        );
+        if (rows.length > 0) {
+            await Promise.all(rows.map(async (row) => {
+                const stats = await getProjectStats(row.id);
+                row.stats = stats[0] ? stats[0] : {};
+            }));
+            res.status(200).json(rows);
+        } else {
+            res.status(404).send({ message: 'No projects found' });
+        }
+    } catch (error) {
+        console.error("Error executing database query:", error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+// Example request: /projects/search?query=example&startIndex=0&limit=10
+router.get('/search', validateQueryParams, async (req, res) => {
+    try {
+        const { query } = req.query;
+        const rows = await executeQuery(
+            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+            FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id) 
+            WHERE p.title LIKE ?
+            LIMIT ?, ?`,
+            [`%${query}%`, req.startIndex, req.limit]
         );
         if (rows.length > 0) {
             await Promise.all(rows.map(async (row) => {

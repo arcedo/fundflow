@@ -175,7 +175,7 @@ router.post('/:id/blogs', verifyUserLogged, uploadImageBlog.single('image'), asy
             idProject: Number(req.params.id),
             title: title,
             content: content,
-            srcImage: req.file.path
+            srcImage: req.file.path || null
         });
         savedBlog.save()
             .then((result) => {

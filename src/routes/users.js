@@ -7,6 +7,9 @@ const UserFollows = require('../models/userFollows');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+
+const validateQueryParams = require('../controllers/validateQueryParams');
+
 const storageProfilePicture = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/profiles');
@@ -164,6 +167,24 @@ router.get('/', verifyUserLogged, async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/search', validateQueryParams, async (req, res) => {
+    try {
+        const { search } = req.query;
+        if (!search) {
+            return res.status(400).json({ message: 'Search parameter is required' });
+        }
+        const [rows, fields] = await db.getPromise().query(`
+        SELECT id, username, url verified, verifiedEmail FROM users 
+        WHERE username LIKE ? OR name LIKE ? OR lastName LIKE ?
+        LIMIT ?, ?`,
+            [`%${search}%`, `%${search}%`, `%${search}%`, req.startIndex, req.limit]);
         res.json(rows);
     } catch (err) {
         console.error(err);

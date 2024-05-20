@@ -65,7 +65,7 @@ router.post('/:id/tiers', verifyUserLogged, uploadTierImage.single('image'), asy
             title,
             description,
             price,
-            srcImage: req.file.path
+            srcImage: req.file.path || null
         });
         const result = await tier.save();
         if (!result) {
