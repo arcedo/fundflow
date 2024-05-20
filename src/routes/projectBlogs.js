@@ -1,9 +1,27 @@
 const { Router } = require('express');
 const router = Router();
 const db = require('../database/mySqlConnection');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 const verifyAdminRole = require('../controllers/verifyAdminRole');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/projects'); // specify the directory where you want to store uploaded files
+    },
+    filename: function (req, file, cb) {
+        // Extract the file extension
+        const fileExtension = file.originalname.split('.').pop();
+        const timestamp = Date.now(); // Get the current timestamp
+        const newFileName = `project_${req.params.id}_img_blog_${timestamp}.${fileExtension}`;
+        // Construct the new file name using the project ID and unique ID
+        cb(null, newFileName);
+    }
+});
+const uploadImageBlog = multer({ storage });
 
 // Schema
 const ProjectsBlogs = require('../models/blogsProjects');
@@ -76,16 +94,28 @@ const ProjectsBlogs = require('../models/blogsProjects');
  *       '500':
  *         description: Internal server error.
  */
-router.get('/:id/blog', async (req, res) => {
+router.get('/:id/blogs', async (req, res) => {
     try {
-        const result = await ProjectsBlogs.find({ idProject: req.params.id }).sort({ creationDate: -1 });
+        const result = await ProjectsBlogs.find({ idProject: Number(req.params.id) }).sort({ creationDate: -1 });
         if (!result) {
-            res.status(404).send({ error: 'No blogs found in these project' });
-        } else {
-            res.status(200).send(result);
+            res.status(404).send({ message: 'No blogs found in these project', code: 404 });
         }
+        res.status(200).send(result);
     } catch (error) {
         console.error('Error in GET /:id/blog route:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/:id/blogs/:idBlog/image', async (req, res) => {
+    try {
+        const blog = await ProjectsBlogs.findOne({ idProject: Number(req.params.id), _id: req.params.idBlog });
+        if (!blog) {
+            return res.status(404).send({ message: 'Blog not found' });
+        }
+        res.status(200).sendFile(path.join(__dirname, '..', '..', blog.srcImage));
+    } catch (error) {
+        console.error('Error in GET /:id/blog/:idBlog/image route:', error);
         res.status(500).send({ error: 'Internal Server Error' });
     }
 });
@@ -126,7 +156,7 @@ router.get('/:id/blog', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.post('/:id/blog', verifyUserLogged, async (req, res) => {
+router.post('/:id/blogs', verifyUserLogged, uploadImageBlog.single('image'), async (req, res) => {
     try {
         const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
@@ -139,9 +169,10 @@ router.post('/:id/blog', verifyUserLogged, async (req, res) => {
         }
         // Save the blog in the database (MongoDB)
         const savedBlog = new ProjectsBlogs({
-            idProject: req.params.id,
+            idProject: Number(req.params.id),
             title: title,
-            content: content
+            content: content,
+            srcImage: req.file.path
         });
         savedBlog.save()
             .then((result) => {
@@ -201,7 +232,7 @@ router.post('/:id/blog', verifyUserLogged, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.put('/:id/blog/:idBlog', verifyUserLogged, async (req, res) => {
+router.put('/:id/blogs/:idBlog', verifyUserLogged, async (req, res) => {
     try {
         const userProject = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         if (userProject.length === 0) {
@@ -264,13 +295,28 @@ router.put('/:id/blog/:idBlog', verifyUserLogged, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-router.delete('/:id/blog/:idBlog', verifyUserLogged, verifyAdminRole, async (req, res) => {
+router.delete('/:id/blogs/:idBlog', verifyUserLogged, verifyAdminRole, async (req, res) => {
     try {
         let rows;
         if (req.admin !== true) {
             rows = await await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
         }
         if (rows.length > 0 || req.admin === true) {
+            const blog = await ProjectsBlogs.findOne({ idProject: Number(req.params.id), _id: req.params.idBlog });
+            if (blog.srcImage) {
+                const filePath = path.join(__dirname, '..', 'uploads', 'projects', blog.srcImage);
+                fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        fs.unlink(filePath, (err) => {
+                            if (err) {
+                                console.error('Error deleting file:', err);
+                            }
+                        });
+                    } else {
+                        console.warn('File does not exist, skipping deletion:', filePath);
+                    }
+                });
+            }
             const result = await ProjectsBlogs.deleteOne({ idProject: req.params.id, _id: req.params.idBlog });
             if (result.deletedCount > 0) {
                 res.status(200).send({ message: 'Blog deleted successfully' });

@@ -15,6 +15,10 @@ const blogsProjectsSchema = new Schema({
         type: String,
         required: true
     },
+    srcImage: {
+        type: String,
+        required: false
+    },
     creationDate: {
         type: Date,
         immutable: true,
