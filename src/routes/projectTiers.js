@@ -60,12 +60,13 @@ router.post('/:id/tiers', verifyUserLogged, uploadTierImage.single('image'), asy
         if (rows.length === 0) {
             return res.status(403).send({ message: 'Forbidden' });
         }
+        const srcImage = req.file ? req.file.path : null;
         const tier = new TiersProjects({
             idProject: Number(req.params.id),
             title,
             description,
             price,
-            srcImage: req.file.path || null
+            srcImage
         });
         const result = await tier.save();
         if (!result) {
