@@ -52,8 +52,8 @@ router.get('/:id/tiers/:idTier/image', async (req, res) => {
 
 router.post('/:id/tiers', verifyUserLogged, uploadTierImage.single('image'), async (req, res) => {
     try {
-        const { description, price } = req.body;
-        if (!description || !price) {
+        const { description, price, title } = req.body;
+        if (!description || !price || !title) {
             return res.status(400).send({ message: 'description, price and srcImage are required' });
         }
         const [rows, fields] = await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
@@ -62,6 +62,7 @@ router.post('/:id/tiers', verifyUserLogged, uploadTierImage.single('image'), asy
         }
         const tier = new TiersProjects({
             idProject: Number(req.params.id),
+            title,
             description,
             price,
             srcImage: req.file.path
@@ -79,8 +80,8 @@ router.post('/:id/tiers', verifyUserLogged, uploadTierImage.single('image'), asy
 
 router.put('/:id/tiers/:idTier', verifyUserLogged, uploadTierImage.single('image'), async (req, res) => {
     try {
-        const { description, price } = req.body;
-        if (!description || !price) {
+        const { description, price, title } = req.body;
+        if (!description || !price || !title) {
             return res.status(400).send({ message: 'description, price and srcImage are required' });
         }
         const [rows, fields] = await db.getPromise().query('SELECT id FROM projects WHERE id = ? AND idUser = ?', [req.params.id, req.userId]);
@@ -94,8 +95,9 @@ router.put('/:id/tiers/:idTier', verifyUserLogged, uploadTierImage.single('image
         if (tier.srcImage && req.file) {
             fs.unlinkSync(path.join(__dirname, '..', 'uploads', 'projects', tier.srcImage));
         }
-        tier.description = description;
-        tier.price = price;
+        tier.title = title || tier.title;
+        tier.description = description || tier.description;
+        tier.price = price || tier.price;
         tier.srcImage = req.file ? req.file.path : tier.srcImage;
         const result = await tier.save();
         if (!result) {
