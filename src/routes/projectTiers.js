@@ -116,13 +116,27 @@ router.delete('/:id/tiers/:idTier', verifyUserLogged, async (req, res) => {
         if (rows.length === 0) {
             return res.status(403).send({ message: 'Forbidden' });
         }
+
         const tier = await TiersProjects.findOne({ _id: req.params.idTier });
         if (!tier) {
             return res.status(404).send({ message: 'Tier not found', code: 404 });
         }
+
         if (tier.srcImage) {
-            fs.unlinkSync(path.join(__dirname, '..', 'uploads', 'projects', tier.srcImage));
+            const filePath = path.join(__dirname, '..', 'uploads', 'projects', tier.srcImage);
+            fs.access(filePath, fs.constants.F_OK, (err) => {
+                if (!err) {
+                    fs.unlink(filePath, (err) => {
+                        if (err) {
+                            console.error('Error deleting file:', err);
+                        }
+                    });
+                } else {
+                    console.warn('File does not exist, skipping deletion:', filePath);
+                }
+            });
         }
+
         await TiersProjects.deleteOne({ _id: req.params.idTier });
         res.status(200).send({ message: 'Tier deleted successfully', code: 200 });
     } catch (error) {
