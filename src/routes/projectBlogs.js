@@ -322,9 +322,9 @@ router.delete('/:id/blogs/:idBlog', verifyUserLogged, verifyAdminRole, async (re
             }
             const result = await ProjectsBlogs.deleteOne({ idProject: req.params.id, _id: req.params.idBlog });
             if (result.deletedCount > 0) {
-                res.status(200).send({ message: 'Blog deleted successfully' });
+                res.status(200).send({ message: 'Blog deleted successfully', code: 200 });
             } else {
-                res.status(404).send({ message: 'No blog found' });
+                res.status(404).send({ message: 'No blog found', code: 404 });
             }
         } else {
             res.status(403).send({ message: 'Forbidden' });
