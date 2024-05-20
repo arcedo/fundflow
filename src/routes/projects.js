@@ -181,14 +181,35 @@ router.get('/', validateQueryParams, async (req, res) => {
 // Example request: /projects/search?query=example&startIndex=0&limit=10
 router.get('/search', validateQueryParams, async (req, res) => {
     try {
-        const { query } = req.query;
-        const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-            FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id) 
-            WHERE p.title LIKE ?
-            LIMIT ?, ?`,
-            [`%${query}%`, req.startIndex, req.limit]
-        );
+        const { query, category, ended } = req.query;
+        let sql = `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+                   FROM projects p 
+                   JOIN users u ON p.idUser = u.id 
+                   JOIN categories c ON p.idCategory = c.id 
+                   WHERE p.title LIKE ?`;
+
+        // Array to hold query parameters
+        const params = [`%${query}%`, req.startIndex, req.limit];
+
+        // Adding category filter if present
+        if (category) {
+            sql += ` AND p.idCategory = ?`;
+            params.splice(1, 0, category); // Insert category param after title search param
+        }
+
+        // Adding ended filter if present
+        if (ended === 'true') {
+            sql += ` AND p.deadlineDate < NOW()`;
+        } else if (ended === 'false') {
+            sql += ` AND p.deadlineDate >= NOW()`;
+        }
+
+        // Adding pagination
+        sql += ` LIMIT ?, ?`;
+
+        // Execute the query with parameters
+        const rows = await executeQuery(sql, params);
+
         if (rows.length > 0) {
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
