@@ -13,12 +13,16 @@ const storage = multer.diskStorage({
         cb(null, './uploads/projects'); // specify the directory where you want to store uploaded files
     },
     filename: function (req, file, cb) {
-        // Extract the file extension
-        const fileExtension = file.originalname.split('.').pop();
-        const timestamp = Date.now(); // Get the current timestamp
-        const newFileName = `project_${req.params.id}_img_blog_${timestamp}.${fileExtension}`;
-        // Construct the new file name using the project ID and unique ID
-        cb(null, newFileName);
+        if (file) {
+            // Extract the file extension
+            const fileExtension = file.originalname.split('.').pop();
+            const timestamp = Date.now(); // Get the current timestamp
+            const newFileName = `project_${req.params.id}_img_blog_${timestamp}.${fileExtension}`;
+            // Construct the new file name using the project ID and unique ID
+            cb(null, newFileName);
+        } else {
+            cb(null, '');
+        }
     }
 });
 const uploadImageBlog = multer({ storage });
