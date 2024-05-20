@@ -109,7 +109,10 @@ router.get('/:id/blogs', async (req, res) => {
 
 router.get('/:id/blogs/:idBlog/image', async (req, res) => {
     try {
+        console.log(req.params.idBlog);
+        console.log(req.params.id);
         const blog = await ProjectsBlogs.findOne({ idProject: Number(req.params.id), _id: req.params.idBlog });
+        console.log(blog);
         if (!blog) {
             return res.status(404).send({ message: 'Blog not found' });
         }
@@ -165,7 +168,7 @@ router.post('/:id/blogs', verifyUserLogged, uploadImageBlog.single('image'), asy
         const { title, content } = req.body;
         // Validate required fields and their types/format if necessary
         if (!title || !content) {
-            return res.status(400).send({ error: 'Title and content are required!' });
+            return res.status(400).send({ message: 'Title and content are required!', code: 400 });
         }
         // Save the blog in the database (MongoDB)
         const savedBlog = new ProjectsBlogs({
@@ -176,11 +179,11 @@ router.post('/:id/blogs', verifyUserLogged, uploadImageBlog.single('image'), asy
         });
         savedBlog.save()
             .then((result) => {
-                res.status(201).send({ message: 'Blog created successfully', id: result._id });
+                res.status(201).send({ result, code: 201 });
             })
             .catch((error) => {
                 console.error('Error saving blog in MongoDB:', error);
-                res.status(400).send({ error: 'Unable to create blog' });
+                res.status(400).send({ message: 'Unable to create blog', code: 400 });
             });
     } catch (error) {
         console.error('Error in POST /:id/blog route:', error);
