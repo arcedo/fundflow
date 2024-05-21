@@ -174,7 +174,7 @@ router.get('/', verifyUserLogged, async (req, res) => {
     }
 });
 
-router.get('/search', validateQueryParams, async (req, res) => {
+router.get('/search/user', validateQueryParams, async (req, res) => {
     try {
         const { search } = req.query;
         if (!search) {
