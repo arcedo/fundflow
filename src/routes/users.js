@@ -182,9 +182,9 @@ router.get('/search/user', validateQueryParams, async (req, res) => {
         }
         const [rows, fields] = await db.getPromise().query(`
         SELECT id, username, url, verified, verifiedEmail FROM users 
-        WHERE username LIKE ? OR name LIKE ? OR lastName LIKE ? OR url LIKE ? 
+        WHERE username LIKE ? OR url LIKE ? 
         LIMIT ?, ?`,
-            [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, req.startIndex, req.limit]);
+            [`%${search}%`, `%${search}%`, req.startIndex, req.limit]);
         res.json(rows);
     } catch (err) {
         console.error(err);
