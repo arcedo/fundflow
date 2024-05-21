@@ -591,9 +591,11 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 projects = await StatsProjects.find({ idUser: req.userId, dislike: true });
                 break;
             case 'funded':
+            case 'both':
                 projects = await StatsProjects.find({ idUser: req.userId, funded: true });
                 break;
             case 'collaborator':
+            case 'both':
                 projects = await StatsProjects.find({ idUser: req.userId, collaborator: true });
                 break;
             default:
