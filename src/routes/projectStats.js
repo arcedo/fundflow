@@ -87,7 +87,8 @@ router.put('/:id/stats', verifyUserLogged, async (req, res) => {
             stats.dislike = evaluationStatus;
         }
         if (fund) {
-            stats.funded = fund + stats.funded;
+            console.log(fund);
+            stats.funded += fund;
         }
         if (collaboration) {
             stats.collaborator = true;
