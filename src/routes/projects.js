@@ -580,7 +580,7 @@ router.get('/byId/:id', async (req, res) => {
 
 // Example request: /projects/byEvaluation/?evaluation=like&startIndex=0&limit=10
 router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, res) => {
-    const { evaluation } = req.query;
+    const { evaluation, userId } = req.query;
     try {
         let projects = [];
         switch (evaluation.toLowerCase()) {
