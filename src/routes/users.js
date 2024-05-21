@@ -184,7 +184,7 @@ router.get('/search/user', validateQueryParams, async (req, res) => {
         SELECT id, username, url, verified, verifiedEmail FROM users 
         WHERE username LIKE ? OR name LIKE ? OR lastName LIKE ? OR url LIKE ? 
         LIMIT ?, ?`,
-            [`%${search}%`, `%${search}%`, `%${search}%`, req.startIndex, req.limit]);
+            [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, req.startIndex, req.limit]);
         res.json(rows);
     } catch (err) {
         console.error(err);
