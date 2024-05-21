@@ -168,7 +168,7 @@ router.get('/', validateQueryParams, async (req, res) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -220,7 +220,7 @@ router.get('/search', validateQueryParams, async (req, res) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -286,7 +286,7 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -354,7 +354,7 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -421,7 +421,7 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -449,7 +449,7 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -515,7 +515,7 @@ router.get('/random', validateQueryParams, async (req, res) => {
                 row.stats = stats[0] ? stats[0] : {};
                 row.imgs = await SrcImages.find({ idProject: row.id });
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -613,7 +613,7 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 if (row.stats.funded || row.stats.collaborators) {
-                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                    row.percentageDone = Math.floor(row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100);
                 } else {
                     row.percentageDone = 0;
                 }
@@ -648,7 +648,7 @@ router.get('/:titleUrl', async (req, res) => {
             rows[0].stats = stats[0] ? stats[0] : {};
             rows[0].imgs = await SrcImages.find({ idProject: rows[0].id });
             if (rows[0].stats.funded || rows[0].stats.collaborators) {
-                rows[0].percentageDone = rows[0].collGoal ? (rows[0].stats.collaborators / rows[0].collGoal) * 100 : (rows[0].stats.funded / rows[0].priceGoal) * 100;
+                rows[0].percentageDone = Math.floor(rows[0].collGoal ? (rows[0].stats.collaborators / rows[0].collGoal) * 100 : (rows[0].stats.funded / rows[0].priceGoal) * 100);
             } else {
                 rows[0].percentageDone = 0;
             }
