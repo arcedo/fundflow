@@ -185,6 +185,7 @@ router.get('/search', validateQueryParams, async (req, res) => {
         WHERE username LIKE ? OR name LIKE ? OR lastName LIKE ?
         LIMIT ?, ?`,
             [`%${search}%`, `%${search}%`, `%${search}%`, req.startIndex, req.limit]);
+        console.log(search);
         console.log(rows);
         res.json(rows);
     } catch (err) {
