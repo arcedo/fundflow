@@ -597,10 +597,9 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
                 projects = await StatsProjects.find({ idUser: req.userId, collaborator: true });
                 break;
             case 'both':
-                const fundedProjects = await StatsProjects.find({ idUser: req.userId, funded: { $gt: 0 } });
-                const collaboratorProjects = await StatsProjects.find({ idUser: req.userId, collaborator: true });
+                const fundedProjects = await StatsProjects.find({ idUser: userId, funded: { $gt: 0 } });
+                const collaboratorProjects = await StatsProjects.find({ idUser: userId, collaborator: true });
                 projects = fundedProjects.concat(collaboratorProjects); // Combine the two arrays
-                console.log(projects);
                 break;
             default:
                 return res.status(400).send({ message: 'Invalid evaluation type' });
