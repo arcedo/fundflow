@@ -167,6 +167,11 @@ router.get('/', validateQueryParams, async (req, res) => {
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -183,10 +188,10 @@ router.get('/search', validateQueryParams, async (req, res) => {
     try {
         const { query, category, ended } = req.query;
         let sql = `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-                   FROM projects p 
-                   JOIN users u ON p.idUser = u.id 
-                   JOIN categories c ON p.idCategory = c.id 
-                   WHERE p.title LIKE ?`;
+                FROM projects p 
+                JOIN users u ON p.idUser = u.id 
+                JOIN categories c ON p.idCategory = c.id 
+                WHERE p.title LIKE ?`;
 
         // Array to hold query parameters
         const params = [`%${query}%`, req.startIndex, req.limit];
@@ -214,6 +219,11 @@ router.get('/search', validateQueryParams, async (req, res) => {
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -275,6 +285,11 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -338,6 +353,11 @@ router.get('/byCategory/:idCategory', validateQueryParams, async (req, res) => {
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -400,6 +420,11 @@ router.get('/byUser/:idUser', validateQueryParams, async (req, res) => {
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -423,6 +448,11 @@ router.get('/byUser', verifyUserLogged, validateQueryParams, async (req, res) =>
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -484,6 +514,11 @@ router.get('/random', validateQueryParams, async (req, res) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
                 row.imgs = await SrcImages.find({ idProject: row.id });
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             res.status(200).json(rows);
         } else {
@@ -577,6 +612,11 @@ router.get('/byEvaluation/', verifyUserLogged, validateQueryParams, async (req, 
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
                 row.stats = stats[0] ? stats[0] : {};
+                if (row.stats.funded || row.stats.collaborators) {
+                    row.percentageDone = row.collGoal ? (row.stats.collaborators / row.collGoal) * 100 : (row.stats.funded / row.priceGoal) * 100;
+                } else {
+                    row.percentageDone = 0;
+                }
             }));
             if (rows.length > 0) {
                 res.status(200).json(rows);
@@ -607,6 +647,11 @@ router.get('/:titleUrl', async (req, res) => {
             const stats = await getProjectStats(rows[0].id);
             rows[0].stats = stats[0] ? stats[0] : {};
             rows[0].imgs = await SrcImages.find({ idProject: rows[0].id });
+            if (rows[0].stats.funded || rows[0].stats.collaborators) {
+                rows[0].percentageDone = rows[0].collGoal ? (rows[0].stats.collaborators / rows[0].collGoal) * 100 : (rows[0].stats.funded / rows[0].priceGoal) * 100;
+            } else {
+                rows[0].percentageDone = 0;
+            }
             res.status(200).json(rows[0]);
         } else {
             res.status(404).send({ message: 'No project found' });

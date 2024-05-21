@@ -90,7 +90,7 @@ router.put('/:id/stats', verifyUserLogged, async (req, res) => {
             stats.funded = fund;
         }
         if (collaboration) {
-            stats.collaborator = collaboration;
+            stats.collaborator = true;
         }
         const result = await stats.save();
         res.status(200).send({ result, code: 200 });
