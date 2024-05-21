@@ -12,7 +12,9 @@ async function getProjectStats(projectId) {
                 likes: { $sum: { $cond: [{ $eq: ["$like", true] }, 1, 0] } },
                 dislikes: { $sum: { $cond: [{ $eq: ["$dislike", true] }, 1, 0] } },
                 funded: { $sum: "$funded" },
-                collaborators: { $sum: { $cond: [{ $eq: ["$collaborator", true] }, 1, 0] } }
+                collaborators: { $sum: { $cond: [{ $eq: ["$collaborator", true] }, 1, 0] } },
+                funders: { $sum: { $cond: [{ $gt: ["$funded", 0] }, 1, 0] } },
+                collaboratorsCount: { $sum: { $cond: [{ $gt: ["$collaborators", 0] }, 1, 0] } }
             }
         },
         {
@@ -22,7 +24,9 @@ async function getProjectStats(projectId) {
                 likes: 1,
                 dislikes: 1,
                 funded: 1,
-                collaborators: 1
+                collaborators: 1,
+                funders: 1,
+                collaboratorsCount: 1
             }
         }
     ]);
