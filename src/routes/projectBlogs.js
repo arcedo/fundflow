@@ -113,10 +113,7 @@ router.get('/:id/blogs', async (req, res) => {
 
 router.get('/:id/blogs/:idBlog/image', async (req, res) => {
     try {
-        console.log(req.params.idBlog);
-        console.log(req.params.id);
         const blog = await ProjectsBlogs.findOne({ idProject: Number(req.params.id), _id: req.params.idBlog });
-        console.log(blog);
         if (!blog) {
             return res.status(404).send({ message: 'Blog not found' });
         }
