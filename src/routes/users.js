@@ -181,8 +181,8 @@ router.get('/search/user', validateQueryParams, async (req, res) => {
             return res.status(400).json({ message: 'Search parameter is required' });
         }
         const [rows, fields] = await db.getPromise().query(`
-        SELECT id, username, url verified, verifiedEmail FROM users 
-        WHERE username LIKE ? OR name LIKE ? OR lastName LIKE ?
+        SELECT id, username, url, verified, verifiedEmail FROM users 
+        WHERE username LIKE ? OR name LIKE ? OR lastName LIKE ? url LIKE ? 
         LIMIT ?, ?`,
             [`%${search}%`, `%${search}%`, `%${search}%`, req.startIndex, req.limit]);
         console.log(search);
