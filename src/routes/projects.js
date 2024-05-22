@@ -24,6 +24,7 @@ const projectBlogs = require('./projectBlogs');
 const projectImages = require('./projectImages');
 const projectStats = require('./projectStats');
 const projectTiers = require('./projectTiers');
+const projectReviews = require('./projectReviews');
 
 // Schemas
 const StatsProjects = require('../models/statsProjects');
@@ -1044,5 +1045,6 @@ router.use('/', projectBlogs);
 router.use('/', projectImages);
 router.use('/', projectStats);
 router.use('/', projectTiers);
+router.use('/', projectReviews);
 
 module.exports = router;
