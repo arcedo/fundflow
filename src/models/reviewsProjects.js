@@ -7,6 +7,18 @@ const reviewsProjectsSchema = new Schema({
         type: Number,
         required: true
     },
+    userUrl: {
+        type: String,
+        required: true
+    },
+    username: {
+        type: String,
+        required: true
+    },
+    idProjectCreator: {
+        type: Number,
+        required: true
+    },
     idProject: {
         type: Number,
         required: true

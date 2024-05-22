@@ -155,14 +155,23 @@ async function executeQuery(sql, params) {
 // Example request: /projects?startIndex=0&limit=10
 router.get('/', validateQueryParams, async (req, res) => {
     // Access the validated values from the request object
+    const { category, ended } = req.query;
     try {
-        const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
+        let sql = `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON (p.idUser = u.id) JOIN categories c ON (p.idCategory = c.id) 
-            ORDER BY p.creationDate DESC 
-            LIMIT ?, ?`,
-            [req.startIndex, req.limit]
-        );
+            `;
+        const params = [req.startIndex, req.limit];
+        if (category) {
+            sql += `WHERE p.idCategory = ?`;
+            params.unshift(category);
+        }
+        if (ended === 'true') {
+            sql += ` ${category ? 'AND' : 'WHERE'} p.deadlineDate < NOW()`;
+        } else if (ended === 'false') {
+            sql += ` ${category ? 'AND' : 'WHERE'} p.deadlineDate >= NOW()`;
+        }
+        sql += ` ORDER BY p.creationDate DESC LIMIT ?, ?`
+        const rows = await executeQuery(sql, params);
         if (rows.length > 0) {
             await Promise.all(rows.map(async (row) => {
                 const stats = await getProjectStats(row.id);
