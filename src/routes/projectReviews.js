@@ -81,10 +81,10 @@ router.delete('/:id/reviews/:idReview', verifyUserLogged, async (req, res) => {
             return res.status(403).send({ message: 'Forbidden', code: 403 });
         }
         await ReviewsProjects.deleteOne({ _id: req.params.idReview });
-        res.status(204).send();
+        res.status(204).send({ message: 'Review deleted', code: 200 });
     } catch (error) {
         console.error('Error in DELETE /:id/reviews/:idReview route:', error);
-        res.status(500).send({ message: 'Internal Server Error' });
+        res.status(500).send({ message: 'Internal Server Error', code: 500 });
     }
 });
 
