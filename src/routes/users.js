@@ -464,16 +464,11 @@ router.get('/:userUrl/profileBanner', async (req, res) => {
 });
 
 router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res) => {
-    console.log('enters');
-    console.log(req.admin);
     if (!req.admin) {
         return res.status(403).json({ message: 'Not allowed' });
     }
     try {
         const [rows] = await db.getPromise().query(`SELECT username, email FROM users LIMIT ?, ?;`, [req.startIndex, req.limit]);
-        console.log(req.startIndex);
-        console.log(req.limit);
-        console.log(rows);
         if (rows.length > 0) {
             res.status(200).json(rows);
         } else {
