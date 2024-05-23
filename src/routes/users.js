@@ -469,6 +469,9 @@ router.get('/admin', verifyAdminRole, validateQueryParams, async (req, res) => {
     }
     try {
         const [rows] = await db.getPromise().query(`SELECT username, email FROM users LIMIT ?, ?;`, [req.startIndex, req.limit]);
+        console.log(req.startIndex);
+        console.log(req.limit);
+        console.log(rows);
         if (rows.length > 0) {
             res.status(200).json(rows);
         } else {
