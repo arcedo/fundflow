@@ -1044,6 +1044,20 @@ router.delete('/:id', verifyUserLogged, verifyAdminRole, async (req, res) => {
     }
 });
 
+router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res) => {
+    try {
+        const rows = await executeQuery('SELECT * FROM projects LIMIT ?, ?', [req.startIndex, req.limit]);
+        if (rows.length > 0) {
+            res.status(200).json(rows);
+        } else {
+            res.status(404).send({ message: 'No projects found' });
+        }
+    } catch (error) {
+        console.error('Error in /admin/panel route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
 // Include the other project related routes
 router.use('/', projectBlogs);
 router.use('/', projectImages);
