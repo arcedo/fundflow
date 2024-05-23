@@ -54,7 +54,7 @@ router.post('/:id/reviews', verifyUserLogged, async (req, res) => {
             return res.status(400).send({ message: 'Missing required fields', code: 400 });
         }
         const newReview = new ReviewsProjects({
-            idUser: req.user.id,
+            idUser: req.userId,
             userUrl: userUrl,
             username: username,
             idProjectCreator: Number(idCreator),
