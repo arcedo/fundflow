@@ -138,7 +138,7 @@ router.post('/register', async (req, res, next) => {
                     // Send verification email
                     const emailResponse = sendVerificationEmail(email, rowsInsert.insertId, username);
                     // Return token
-                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl: userUrl, verifiedEmail: false, emailResponseCode: emailResponse.code });
+                    res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl: userUrl, verifiedEmail: false, emailResponseCode: emailResponse.code, role: false });
                 } else {
                     res.status(500).send({ message: 'Something went wrong while adding your account!' });
                 }
@@ -184,12 +184,12 @@ router.post('/login', async (req, res, next) => {
         } else {
             const isValidEmail = username.includes('@') && username.includes('.') && username.indexOf('@') < username.lastIndexOf('.');
             const query = isValidEmail ? 'email' : 'username';
-            const [rows, fields] = await db.getPromise().query(`SELECT id, url as userUrl, hashPassword, verifiedEmail FROM users WHERE ${query} = ?;`, [username]);
+            const [rows, fields] = await db.getPromise().query(`SELECT id, url as userUrl, hashPassword, verifiedEmail, role FROM users WHERE ${query} = ?;`, [username]);
             if (rows.length === 1) {
                 const hashedPassword = rows[0].hashPassword;
                 const passwordMatch = await Bun.password.verify(password, hashedPassword);
                 if (passwordMatch) {
-                    res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET), userUrl: rows[0].userUrl, verifiedEmail: rows[0].verifiedEmail });
+                    res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET), userUrl: rows[0].userUrl, verifiedEmail: rows[0].verifiedEmail, role: rows[0].role });
                 } else {
                     res.status(401).send({ message: 'Authentication failed', errorValues: { username, password } });
                 }
@@ -216,7 +216,7 @@ router.post('/login/google', async (req, res, next) => {
         const googleUserData = await googleUser.json();
         const [rows, fields] = await db.getPromise().query('SELECT id, username, hashPassword, role, url as userUrl, verifiedEmail FROM users WHERE email = ?', [googleUserData.email]);
         if (rows.length === 1) {
-            res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET), userUrl: rows[0].userUrl, verifiedEmail: rows[0].verifiedEmail });
+            res.status(200).send({ token: jwt.sign({ id: rows[0].id }, process.env.ACCESS_TOKEN_SECRET), userUrl: rows[0].userUrl, verifiedEmail: rows[0].verifiedEmail, role: rows[0].role });
         } else {
             const username = googleUserData.email.split('@')[0];
             const userUrl = username.replace(/\s+/g, '_').toLowerCase();
@@ -225,7 +225,7 @@ router.post('/login/google', async (req, res, next) => {
                 [username, googleUserData.email, new Date().toLocaleDateString('en-GB', dateOptions), userUrl, path.join(`uploads/defaultAvatars/${Math.floor(Math.random() * 6) + 1}.svg`), path.join(`uploads/defaultBanners/${Math.floor(Math.random() * 2) + 1}.svg`), true, true]
             );
             if (rowsInsert.affectedRows > 0) {
-                res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl, verifiedEmail: true });
+                res.status(201).send({ token: jwt.sign({ id: rowsInsert.insertId }, process.env.ACCESS_TOKEN_SECRET), userUrl, verifiedEmail: true, role: false });
             } else {
                 res.status(500).send({ message: 'Something went wrong while adding your account!' });
             }
