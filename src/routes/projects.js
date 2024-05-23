@@ -1045,6 +1045,9 @@ router.delete('/:id', verifyUserLogged, verifyAdminRole, async (req, res) => {
 });
 
 router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res) => {
+    if (!req.admin) {
+        return res.status(403).send({ message: 'Unauthorized' });
+    }
     try {
         const rows = await executeQuery('SELECT * FROM projects LIMIT ?, ?', [req.startIndex, req.limit]);
         if (rows.length > 0) {
