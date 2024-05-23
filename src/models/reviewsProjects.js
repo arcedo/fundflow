@@ -11,7 +11,7 @@ const reviewsProjectsSchema = new Schema({
         type: String,
         required: true
     },
-    username: {
+    projectName: {
         type: String,
         required: true
     },
