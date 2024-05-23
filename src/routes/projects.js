@@ -284,7 +284,7 @@ router.get('/search', validateQueryParams, async (req, res) => {
 router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
         const likedProjects = await StatsProjects.find({ idUser: req.userId, likes: true });
-        if (likedProjectsIds.length < 1) {
+        if (likedProjects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         }
         const likedProjectsCategoryIds = likedProjects.map((project) => project.idCategory);
@@ -293,7 +293,7 @@ router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, re
             FROM projects p JOIN users u ON p.idUser = u.id JOIN categories c ON p.idCategory = c.id 
             WHERE p.idCategory IN (${likedProjectsCategoryIds.join(',')}) 
             LIMIT ?, ?;`,
-            [likedProjectsIds, req.startIndex, req.limit]
+            [req.startIndex, req.limit]
         );
         if (rows.length > 0) {
             await Promise.all(rows.map(async (row) => {
