@@ -19,9 +19,9 @@ router.get('/:id/reviews', async (req, res) => {
     }
 });
 
-router.get('/reviewing/byUser', verifyUserLogged, async (req, res) => {
+router.get('/reviewing/byUser/:id', async (req, res) => {
     try {
-        const reviews = await ReviewsProjects.find({ idUser: req.userId });
+        const reviews = await ReviewsProjects.find({ idUser: req.params.id });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
@@ -33,9 +33,9 @@ router.get('/reviewing/byUser', verifyUserLogged, async (req, res) => {
     }
 });
 
-router.get('/reviewed/byUser', verifyUserLogged, async (req, res) => {
+router.get('/reviewed/byUser/:id', async (req, res) => {
     try {
-        const reviews = await ReviewsProjects.find({ idProjectCreator: req.userId });
+        const reviews = await ReviewsProjects.find({ idProjectCreator: req.params.id });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
