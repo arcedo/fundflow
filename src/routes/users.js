@@ -464,6 +464,8 @@ router.get('/:userUrl/profileBanner', async (req, res) => {
 });
 
 router.get('/admin', verifyAdminRole, validateQueryParams, async (req, res) => {
+    console.log('enters');
+    console.log(req.admin);
     if (!req.admin) {
         return res.status(403).json({ message: 'Not allowed' });
     }
