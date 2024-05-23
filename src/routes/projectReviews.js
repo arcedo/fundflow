@@ -61,7 +61,7 @@ router.post('/:id/reviews', verifyUserLogged, async (req, res) => {
             idProject: Number(req.params.id),
             projectUrl: projectUrl,
             body,
-            rating,
+            rating: rating,
         });
         await newReview.save();
         res.status(201).send(newReview);
