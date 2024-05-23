@@ -23,6 +23,10 @@ const reviewsProjectsSchema = new Schema({
         type: Number,
         required: true
     },
+    projectUrl: {
+        type: String,
+        required: true
+    },
     body: {
         type: String,
         required: true
