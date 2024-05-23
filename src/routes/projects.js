@@ -283,7 +283,7 @@ router.get('/search', validateQueryParams, async (req, res) => {
 // Example request: /projects/byInterests?startIndex=0&limit=10
 router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
-        const likedProjects = await StatsProjects.find({ idUser: Number(req.userId), likes: true });
+        const likedProjects = await StatsProjects.find({ idUser: Number(req.userId), like: true });
         console.log(likedProjects);
         if (likedProjects.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
