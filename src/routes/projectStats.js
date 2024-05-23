@@ -7,7 +7,12 @@ const getProjectStats = require('../controllers/getProjectStats');
 
 router.get('/:id/stats/user/', verifyUserLogged, async (req, res) => {
     try {
-        const stats = await StatsProjects.findOne({ idUser: Number(req.userId), idProject: Number(req.params.id) });
+        const idUser = Number(req.userId);
+        const idProject = Number(req.params.id);
+        if (Number.isNaN(idUser) || Number.isNaN(idProject)) {
+            return res.status(400).send({ message: 'Invalid idUser or idProject', code: 400 });
+        }
+        const stats = await StatsProjects.findOne({ idUser, idProject });
         if (!stats) {
             return res.status(404).send({ message: 'Stats not found', code: 404 });
         }
