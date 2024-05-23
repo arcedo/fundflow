@@ -284,11 +284,14 @@ router.get('/search', validateQueryParams, async (req, res) => {
 router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
         const likedProjectsIds = await StatsProjects.find({ idUser: req.userId, likes: true }).map((project) => project.idProject);
+        if (likedProjectsIds.length < 1) {
+            return res.status(404).send({ message: 'No projects found' });
+        }
         const rows = await executeQuery(
-            `SELECT p.id, c.name as category, p.url as projectUrl, p.idCategory, p.url AS projectUrl, u.url AS userUrl, u.username as creator, p.idUser, p.title, p.priceGoal, p.collGoal
-                FROM projects p JOIN users u ON (p.idUser LIKE u.id) JOIN categories c ON (p.idCategory LIKE c.id) 
-                WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN(?)) 
-                LIMIT ?, ?`,
+            `SELECT p.id, c.name AS category, p.url AS projectUrl, u.url AS userUrl, u.username AS creator, p.idUser, p.title, p.priceGoal, p.collGoal
+            FROM projects p JOIN users u ON p.idUser = u.id JOIN categories c ON p.idCategory = c.id 
+            WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN (${likedProjectsIds.join(',')})) 
+            LIMIT ?, ?;`,
             [likedProjectsIds, req.startIndex, req.limit]
         );
         if (rows.length > 0) {
