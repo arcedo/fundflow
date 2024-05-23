@@ -463,7 +463,7 @@ router.get('/:userUrl/profileBanner', async (req, res) => {
     }
 });
 
-router.get('/admin', verifyAdminRole, validateQueryParams, async (req, res) => {
+router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res) => {
     console.log('enters');
     console.log(req.admin);
     if (!req.admin) {
