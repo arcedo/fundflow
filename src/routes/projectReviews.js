@@ -77,7 +77,7 @@ router.delete('/:id/reviews/:idReview', verifyUserLogged, async (req, res) => {
         if (!review) {
             return res.status(404).send({ message: 'Review not found', code: 404 });
         }
-        if (review.idUser !== req.user.id) {
+        if (review.idUser !== req.userId) {
             return res.status(403).send({ message: 'Forbidden', code: 403 });
         }
         await ReviewsProjects.deleteOne({ _id: req.params.idReview });
