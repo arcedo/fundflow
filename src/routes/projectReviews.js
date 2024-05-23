@@ -19,7 +19,7 @@ router.get('/:id/reviews', async (req, res) => {
     }
 });
 
-router.get('/byUser/reviewing', verifyUserLogged, async (req, res) => {
+router.get('/reviewing/byUser', verifyUserLogged, async (req, res) => {
     try {
         const reviews = await ReviewsProjects.find({ idUser: req.userId });
         if (!reviews) {
@@ -33,7 +33,7 @@ router.get('/byUser/reviewing', verifyUserLogged, async (req, res) => {
     }
 });
 
-router.get('/byUser/reviewed', verifyUserLogged, async (req, res) => {
+router.get('/reviewed/byUser', verifyUserLogged, async (req, res) => {
     try {
         const reviews = await ReviewsProjects.find({ idProjectCreator: req.userId });
         if (!reviews) {
