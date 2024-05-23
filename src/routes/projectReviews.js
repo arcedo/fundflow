@@ -4,11 +4,11 @@ const db = require('../database/mySqlConnection');
 
 const verifyUserLogged = require('../controllers/verifyUserLogged');
 
-const StatsProjects = require('../models/statsProjects');
+const ReviewsProjects = require('../models/reviewsProjects');
 
 router.get('/:id/reviews', async (req, res) => {
     try {
-        const reviews = await StatsProjects.find({ idProject: Number(req.params.id) });
+        const reviews = await ReviewsProjects.find({ idProject: Number(req.params.id) });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
@@ -21,7 +21,7 @@ router.get('/:id/reviews', async (req, res) => {
 
 router.get('/byUser/reviewing', verifyUserLogged, async (req, res) => {
     try {
-        const reviews = await StatsProjects.find({ idUser: req.user.id });
+        const reviews = await ReviewsProjects.find({ idUser: req.user.id });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
@@ -35,7 +35,7 @@ router.get('/byUser/reviewing', verifyUserLogged, async (req, res) => {
 
 router.get('/byUser/reviewed', verifyUserLogged, async (req, res) => {
     try {
-        const reviews = await StatsProjects.find({ idProjectCreator: req.user.id });
+        const reviews = await ReviewsProjects.find({ idProjectCreator: req.user.id });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
@@ -47,15 +47,19 @@ router.get('/byUser/reviewed', verifyUserLogged, async (req, res) => {
     }
 });
 
-router.post('/:id/reviews', verifyUserLogged, async (req, res) => {
+router.post('/:id/reviews', ReviewsProjects, async (req, res) => {
     try {
-        const { body, rating } = req.body;
-        if (!body || !rating) {
+        const { body, rating, userUrl, username, idCreator, projectUrl } = req.body;
+        if (!body || !rating || !userUrl || !username || !idCreator || projectUrl) {
             return res.status(400).send({ message: 'Missing required fields', code: 400 });
         }
-        const newReview = new StatsProjects({
+        const newReview = new ReviewsProjects({
             idUser: req.user.id,
+            userUrl: userUrl,
+            username: username,
+            idProjectCreator: Number(idCreator),
             idProject: Number(req.params.id),
+            projectUrl: projectUrl,
             body,
             rating,
         });
@@ -69,14 +73,14 @@ router.post('/:id/reviews', verifyUserLogged, async (req, res) => {
 
 router.delete('/:id/reviews/:idReview', verifyUserLogged, async (req, res) => {
     try {
-        const review = await StatsProjects.findOne({ _id: req.params.idReview });
+        const review = await ReviewsProjects.findOne({ _id: req.params.idReview });
         if (!review) {
             return res.status(404).send({ message: 'Review not found', code: 404 });
         }
         if (review.idUser !== req.user.id) {
             return res.status(403).send({ message: 'Forbidden', code: 403 });
         }
-        await StatsProjects.deleteOne({ _id: req.params.idReview });
+        await ReviewsProjects.deleteOne({ _id: req.params.idReview });
         res.status(204).send();
     } catch (error) {
         console.error('Error in DELETE /:id/reviews/:idReview route:', error);
