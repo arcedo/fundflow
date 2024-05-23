@@ -465,17 +465,20 @@ router.get('/:userUrl/profileBanner', async (req, res) => {
 
 router.get('/admin', verifyAdminRole, validateQueryParams, async (req, res) => {
     if (!req.admin) {
-        res.status(403).json({ message: 'Not allowed' })
+        return res.status(403).json({ message: 'Not allowed' });
     }
     try {
         const [rows] = await db.getPromise().query(`SELECT username, email FROM users LIMIT ?, ?;`, [req.startIndex, req.limit]);
         if (rows.length > 0) {
             res.status(200).json(rows);
+        } else {
+            res.status(404).json({ message: 'No users found' });
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' })
+        console.error('Error in GET /admin route:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 module.exports = router;
