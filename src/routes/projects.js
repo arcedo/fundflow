@@ -283,14 +283,15 @@ router.get('/search', validateQueryParams, async (req, res) => {
 // Example request: /projects/byInterests?startIndex=0&limit=10
 router.get('/byInterests', verifyUserLogged, validateQueryParams, async (req, res) => {
     try {
-        const likedProjectsIds = await StatsProjects.find({ idUser: req.userId, likes: true }).map((project) => project.idProject);
+        const likedProjects = await StatsProjects.find({ idUser: req.userId, likes: true });
         if (likedProjectsIds.length < 1) {
             return res.status(404).send({ message: 'No projects found' });
         }
+        const likedProjectsCategoryIds = likedProjects.map((project) => project.idCategory);
         const rows = await executeQuery(
             `SELECT p.id, c.name AS category, p.url AS projectUrl, u.url AS userUrl, u.username AS creator, p.idUser, p.title, p.priceGoal, p.collGoal
             FROM projects p JOIN users u ON p.idUser = u.id JOIN categories c ON p.idCategory = c.id 
-            WHERE p.idCategory IN (SELECT p2.idCategory FROM projects p2 WHERE p2.id IN (${likedProjectsIds.join(',')})) 
+            WHERE p.idCategory IN (${likedProjectsCategoryIds.join(',')}) 
             LIMIT ?, ?;`,
             [likedProjectsIds, req.startIndex, req.limit]
         );
