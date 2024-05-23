@@ -21,7 +21,7 @@ router.get('/:id/reviews', async (req, res) => {
 
 router.get('/byUser/reviewing', verifyUserLogged, async (req, res) => {
     try {
-        const reviews = await ReviewsProjects.find({ idUser: req.user.id });
+        const reviews = await ReviewsProjects.find({ idUser: req.userId });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
@@ -35,7 +35,7 @@ router.get('/byUser/reviewing', verifyUserLogged, async (req, res) => {
 
 router.get('/byUser/reviewed', verifyUserLogged, async (req, res) => {
     try {
-        const reviews = await ReviewsProjects.find({ idProjectCreator: req.user.id });
+        const reviews = await ReviewsProjects.find({ idProjectCreator: req.userId });
         if (!reviews) {
             return res.status(404).send({ message: 'Reviews not found', code: 404 });
         }
