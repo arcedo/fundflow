@@ -50,6 +50,7 @@ router.get('/byUser/reviewed', verifyUserLogged, async (req, res) => {
 router.post('/:id/reviews', verifyUserLogged, async (req, res) => {
     try {
         const { body, rating, userUrl, username, idCreator, projectUrl } = req.body;
+        console.log(rating);
         if (!body || !rating || !userUrl || !username || !idCreator || !projectUrl) {
             return res.status(400).send({ message: 'Missing required fields', code: 400 });
         }
