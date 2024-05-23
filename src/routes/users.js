@@ -468,7 +468,7 @@ router.get('/admin', verifyAdminRole, validateQueryParams, async (req, res) => {
         res.status(403).json({ message: 'Not allowed' })
     }
     try {
-        const [rows] = await db.getPromise().query(`SELECT username, email FROM users LIMIT ?, ?;`)
+        const [rows] = await db.getPromise().query(`SELECT username, email FROM users LIMIT ?, ?;`, [req.startIndex, req.limit]);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' })

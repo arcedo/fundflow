@@ -47,7 +47,7 @@ router.get('/byUser/reviewed', verifyUserLogged, async (req, res) => {
     }
 });
 
-router.post('/:id/reviews', ReviewsProjects, async (req, res) => {
+router.post('/:id/reviews', verifyUserLogged, async (req, res) => {
     try {
         const { body, rating, userUrl, username, idCreator, projectUrl } = req.body;
         if (!body || !rating || !userUrl || !username || !idCreator || projectUrl) {
