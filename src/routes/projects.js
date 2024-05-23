@@ -1049,7 +1049,7 @@ router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res
         return res.status(403).send({ message: 'Unauthorized' });
     }
     try {
-        const rows = await executeQuery('SELECT * FROM projects LIMIT ?, ?', [req.startIndex, req.limit]);
+        const rows = await executeQuery('SELECT p.title, p.url, u.username FROM projects p JOIN users u ON p.idUser = u.id LIMIT ?, ?', [req.startIndex, req.limit]);
         if (rows.length > 0) {
             res.status(200).json(rows);
         } else {
