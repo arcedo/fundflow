@@ -472,7 +472,7 @@ router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res
         if (rows.length > 0) {
             res.status(200).json(rows);
         } else {
-            res.status(404).json({ message: 'No users found' });
+            res.status(404).json({ message: 'No users found', code: 404 });
         }
     } catch (error) {
         console.error('Error in GET /admin route:', error);
