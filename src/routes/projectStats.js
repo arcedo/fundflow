@@ -76,6 +76,21 @@ router.put('/:id/stats/views', verifyUserLogged, async (req, res) => {
     }
 });
 
+router.post('/:id/stats/like', verifyUserLogged, async (req, res) => {
+    try {
+        const stats = new StatsProjects({
+            idUser: req.userId,
+            idCategory: req.body.idCategory,
+            idProject: req.params.id,
+            like: true
+        });
+        const result = await stats.save();
+        res.status(201).send(result);
+    } catch (error) {
+        console.error('Error in POST /:id/stats/like route:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
 
 router.put('/:id/stats', verifyUserLogged, async (req, res) => {
     try {
