@@ -340,6 +340,7 @@ router.delete('/:id', verifyAdminRole, async (req, res) => {
     }
     try {
         const [rows, fields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.params.id]);
+        const deleteFollows = await UserFollows.deleteMany({ userUrl: req.params.id, followsUserUrl: req.params.id });
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -371,6 +372,7 @@ router.delete('/', verifyUserLogged, async (req, res) => {
         if (deleteRows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
+        const deleteFollows = await UserFollows.deleteMany({ userUrl: req.userId, followsUserUrl: req.userId });
         res.status(200).json({ message: 'User deleted successfully', id: req.userId });
     } catch (err) {
         console.error(err);
