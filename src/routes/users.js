@@ -346,7 +346,7 @@ router.delete('/:id', verifyAdminRole, async (req, res) => {
                 { followsUserUrl: req.params.id }
             ]
         });
-
+        console.log(deleteFollows);
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -384,6 +384,7 @@ router.delete('/', verifyUserLogged, async (req, res) => {
                 { followsUserUrl: req.userId }
             ]
         });
+        console.log(deleteFollows);
         res.status(200).json({ message: 'User deleted successfully', id: req.userId });
     } catch (err) {
         console.error(err);
