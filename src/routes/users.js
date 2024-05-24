@@ -468,7 +468,7 @@ router.get('/admin/panel', verifyAdminRole, validateQueryParams, async (req, res
         return res.status(403).json({ message: 'Not allowed' });
     }
     try {
-        const [rows] = await db.getPromise().query(`SELECT username, email, url FROM users LIMIT ?, ?;`, [req.startIndex, req.limit]);
+        const [rows] = await db.getPromise().query(`SELECT id, username, email, url FROM users LIMIT ?, ?;`, [req.startIndex, req.limit]);
         if (rows.length > 0) {
             res.status(200).json(rows);
         } else {
