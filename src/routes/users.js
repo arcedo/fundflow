@@ -339,14 +339,14 @@ router.delete('/:id', verifyAdminRole, async (req, res) => {
         return res.status(403).json({ message: 'Forbidden' });
     }
     try {
+        const [rowsUserToDelete] = await db.getPromise().query('SELECT url FROM users WHERE id = ?', [req.params.id]);
         const [rows, fields] = await db.getPromise().query('DELETE FROM users WHERE id = ?', [req.params.id]);
         const deleteFollows = await UserFollows.deleteMany({
             $or: [
-                { userUrl: req.params.id },
-                { followsUserUrl: req.params.id }
+                { userUrl: rowsUserToDelete[0].url },
+                { followsUserUrl: rowsUserToDelete[0].url }
             ]
         });
-        console.log(deleteFollows);
         if (rows.affectedRows === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -361,7 +361,7 @@ router.delete('/:id', verifyAdminRole, async (req, res) => {
 router.delete('/', verifyUserLogged, async (req, res) => {
     const { password } = req.body;
     try {
-        const [rows, fields] = await db.getPromise().query('SELECT hashPassword, googleAccount FROM users WHERE id = ?', [req.userId]);
+        const [rows, fields] = await db.getPromise().query('SELECT hashPassword, googleAccount, url FROM users WHERE id = ?', [req.userId]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -380,11 +380,10 @@ router.delete('/', verifyUserLogged, async (req, res) => {
         }
         const deleteFollows = await UserFollows.deleteMany({
             $or: [
-                { userUrl: req.userId },
-                { followsUserUrl: req.userId }
+                { userUrl: rows[0].url },
+                { followsUserUrl: rows[0].url }
             ]
         });
-        console.log(deleteFollows);
         res.status(200).json({ message: 'User deleted successfully', id: req.userId });
     } catch (err) {
         console.error(err);
