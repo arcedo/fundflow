@@ -15,8 +15,6 @@ app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads/profil
 app.use('/uploads/defaultAvatars', express.static(path.join(__dirname, 'uploads/defaultAvatars')));
 app.use('/uploads/defaultBanners', express.static(path.join(__dirname, 'uploads/defaultBanners')));
 
-console.log(await Bun.password.hash('youNeverSeeACumMan', { algorithm: 'bcrypt' }));
-
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
@@ -38,31 +36,31 @@ const dbConfig = {
     database: process.env.DB_NAME ?? 'fundflow',
 }
 
-// db.connect(dbConfig, (err) => {
-//     if (err) {
-//         console.error('Unable to connect to the database (MySQL):', err);
-//         process.exit(1);
-//     } else {
-//         db.get().query('SELECT NOW() as date;', function (err, rows) {
-//             if (err) {
-//                 console.error('Unable to execute query to MySQL: ' + err);
-//                 process.exit(1);
-//             } else {
-//                 console.log(`MySQL: Connected to MySQL ${dbConfig.database} successfully\nDATE: ${rows[0]['date']}`);
-//             }
-//         });
-//     }
-// });
+db.connect(dbConfig, (err) => {
+    if (err) {
+        console.error('Unable to connect to the database (MySQL):', err);
+        process.exit(1);
+    } else {
+        db.get().query('SELECT NOW() as date;', function (err, rows) {
+            if (err) {
+                console.error('Unable to execute query to MySQL: ' + err);
+                process.exit(1);
+            } else {
+                console.log(`MySQL: Connected to MySQL ${dbConfig.database} successfully\nDATE: ${rows[0]['date']}`);
+            }
+        });
+    }
+});
 
-// // Routes
-// const routes = require('./src/routes/routes');
-// app.use('/', routes);
+// Routes
+const routes = require('./src/routes/routes');
+app.use('/', routes);
 
-// // Connect to MongoDB
-// try {
-//     mongoose.connect(process.env.MONGO_URL, { dbName: 'fundflow' });
+// Connect to MongoDB
+try {
+    mongoose.connect(process.env.MONGO_URL, { dbName: 'fundflow' });
 
-//     console.log('MongoDB: Connected to MongoDB fundflow successfully');
-// } catch (error) {
-//     console.error('Error connecting to MongoDB: ', error.stack);
-// }
+    console.log('MongoDB: Connected to MongoDB fundflow successfully');
+} catch (error) {
+    console.error('Error connecting to MongoDB: ', error.stack);
+}
