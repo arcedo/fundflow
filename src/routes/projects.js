@@ -751,10 +751,12 @@ router.post('/', verifyUserLogged, async (req, res) => {
 
         let result;
         let url = title.replace(/\s+/g, '_').toLowerCase();
-        const [checkUrlRows, checkUrlFields] = await db.getPromise().query('SELECT id FROM projects WHERE url = ?', [`${url}%`]);
+        const [checkUrlRows, checkUrlFields] = await db.getPromise().query('SELECT id FROM projects WHERE url LIKE ?', [`${url}%`]);
+
         if (checkUrlRows.length > 0) {
             url = `${url}_${checkUrlRows.length}`;
         }
+
         if (typeGoal === 'funds' && !currency) {
             return res.status(400).json({ message: 'Currency is required!' });
         } else if (typeGoal === 'funds') {
