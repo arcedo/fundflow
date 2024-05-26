@@ -834,7 +834,7 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
         let result;
         let url = title.replace(/\s+/g, '_').toLowerCase();
 
-        const urlInUse = await executeQuery('SELECT id FROM projects WHERE url = ? AND id != ?', [url, req.params.id]);
+        const urlInUse = await executeQuery('SELECT id FROM projects WHERE url = ? AND id != ?', [`${url}%`, req.params.id]);
         if (urlInUse.length > 0) {
             url = `${url}_${urlInUse.length}`;
         }
