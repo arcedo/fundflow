@@ -22,7 +22,7 @@ const blogsProjectsSchema = new Schema({
     creationDate: {
         type: Date,
         immutable: true,
-        default: Date.now()
+        default: Date.now
     },
 });
 
