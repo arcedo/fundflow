@@ -836,10 +836,25 @@ router.put('/:id', verifyUserLogged, async (req, res) => {
         let result;
         let url = title.replace(/\s+/g, '_').toLowerCase();
 
-        const urlInUse = await executeQuery('SELECT id FROM projects WHERE url = ? AND id != ?', [`${url}%`, req.params.id]);
+        // Use the LIKE operator to find URLs that start with the given string
+        const urlInUse = await executeQuery(
+            'SELECT url FROM projects WHERE url LIKE ? AND id != ?',
+            [`${url}%`, req.params.id]
+        );
+
         if (urlInUse.length > 0) {
-            url = `${url}_${urlInUse.length}`;
+            // Create a set of existing URLs for easy checking
+            const urlSet = new Set(urlInUse.map(row => row.url));
+            let suffix = 1;
+
+            // Find the next available unique URL by checking the set
+            while (urlSet.has(`${url}_${suffix}`)) {
+                suffix++;
+            }
+
+            url = `${url}_${suffix}`;
         }
+
         if (typeGoal === 'price' && !currency) {
             return res.status(400).send({ message: 'Currency is required!' });
         } else if (typeGoal === 'price') {
