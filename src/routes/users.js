@@ -244,9 +244,16 @@ router.put('/', verifyUserLogged, async (req, res) => {
         if (rows.length > 0) {
             return res.status(400).json({ message: 'Username or email already in use', errorValues: { username, email } });
         }
+        const [rowsUser, fieldsUser] = await db.getPromise().query('SELECT email FROM users WHERE id = ?', [req.userId]);
+        if (rowsUser.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         const url = username.replace(/\s+/g, '_').toLowerCase();
         const [rowsLoggedUser, fieldsLoggedUser] = await db.getPromise().query('SELECT hashPassword FROM users WHERE id = ?', [req.userId]);
         let sqlQuery = 'UPDATE users SET username = ?, email = ?, name = ?, lastName = ?, biography = ?, url = ?';
+        if (email !== rowsUser[0].email) {
+            sqlQuery += ', verifiedEmail = 0';
+        }
         const values = [username, email, name, lastName, biography, url];
         const passwordMatch = await Bun.password.verify(currentPassword, rowsLoggedUser[0].hashPassword);
         if (!passwordMatch) {
